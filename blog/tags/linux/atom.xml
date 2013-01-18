@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: linux | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/tags/linux/atom.xml" rel="self"/>
+  <link href="http://HungMingWu.github.com/"/>
+  <updated>2013-01-18T23:19:26+08:00</updated>
+  <id>http://HungMingWu.github.com/</id>
+  <author>
+    <name><![CDATA[吳小明]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[如何在ubuntu中設定ssh]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/01/14/setup-ssh-server-in-ubuntu/"/>
+    <updated>2013-01-14T22:08:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/01/14/setup-ssh-server-in-ubuntu</id>
+    <content type="html"><![CDATA[<h2 id="openssh-server">安裝openssh-server</h2>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">apt</span>-get install openssh-server
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>現在就可以用Putty從遠端登入了，如果要有更佳的安全性，需要做進一步的設定。</p>
+
+<h2 id="sshdconfig">修改sshd_config</h2>
+<p>這個檔案位在<code>/etc/ssh/sshd_config</code>。</p>
+
+<h3 id="rootlogin">禁止root帳號login</h3>
+<p>將設定檔裡面的 PermitRootLogin <strong>yes</strong> 改成 <strong>no</strong>。</p>
+
+<h3 id="login-port">更改login port</h3>
+<p>修改Port <strong>22</strong>。</p>
+
+<h2 id="ip">允許特定IP登入</h2>
+<p>修改<code>/etc/hosts.allow</code>這個檔案</p>
+
+<p>新增 <code>sshd: xxx.xxx.xxx.xxx allow</code>允許特定的IP放行。</p>
+
+<h3 id="ip-1">拒絕所有IP登入，除了上面已經允許的部分</h3>
+<p>修改<code>/etc/hosts.deny</code></p>
+
+<p>新增<code>sshd: all deny</code></p>
+
+<h2 id="section">修改設定過後，重新啟動服務</h2>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>/etc/init.d/ssh <span class="err">(</span>stop / start / restart<span class="err">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>

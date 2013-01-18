@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: programming | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/categories/programming/atom.xml" rel="self"/>
+  <link href="http://HungMingWu.github.com/"/>
+  <updated>2013-01-18T23:19:26+08:00</updated>
+  <id>http://HungMingWu.github.com/</id>
+  <author>
+    <name><![CDATA[吳小明]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[如何從一個Singly linked linear list中刪除資料]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/"/>
+    <updated>2013-01-14T22:08:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list</id>
+    <content type="html"><![CDATA[<p>要從一個<strong>singly lisked linerar list</strong>中刪除文件，最簡單的方式莫過於用一個指標指向前一個node，如果現在的item需要刪除，將前面一項item指向後面的item即可。</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">node</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span> <span class="n">next</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span> <span class="n">node</span><span class="p">;</span>  <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">node</span> <span class="o">*</span><span class="n">remove_if</span><span class="p">(</span><span class="n">node</span> <span class="o">*</span> <span class="n">head</span><span class="p">,</span> <span class="n">remove_fn</span> <span class="n">rm</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>     <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">node</span> <span class="o">*</span><span class="n">prev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span> <span class="n">curr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="p">)</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="p">{</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="n">node</span> <span class="o">*</span> <span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">rm</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="p">{</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="p">(</span><span class="n">prev</span><span class="p">)</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                            <span class="n">prev</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="k">else</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                            <span class="n">head</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="n">free</span><span class="p">(</span><span class="n">curr</span><span class="p">);</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="p">}</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="k">else</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="n">prev</span> <span class="o">=</span> <span class="n">curr</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="p">}</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">head</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>有人提出了更精巧的方法，利用<strong>two star pointer</strong>來達成，也就是指標的指標。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">remove_if</span><span class="p">(</span><span class="n">node</span> <span class="o">&lt;</span><span class="n">strong</span><span class="o">&gt;</span><span class="n">head</span><span class="p">,</span> <span class="n">remove_fn</span> <span class="n">rm</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">node</span><span class="o">&lt;/</span><span class="n">strong</span><span class="o">&gt;</span> <span class="n">curr</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span> <span class="o">*</span><span class="n">curr</span><span class="p">;</span> <span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>            <span class="n">node</span> <span class="o">*</span> <span class="n">entry</span> <span class="o">=</span> <span class="o">*</span><span class="n">curr</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">rm</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                    <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">entry</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span>
+</span><span class='line'>                    <span class="n">free</span><span class="p">(</span><span class="n">entry</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                    <span class="n">curr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">entry</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>在C++11的年代，增加了<code>forward_list</code>，省得自己造輪子的麻煩。
+以下是forward_list的介紹。
+<blockquote><p>std::forward_list is a container that supports fast insertion and removal of elements from anywhere in the container. Fast random access is not supported. It is implemented as singly-linked list and essentially does not have any overhead compared to its implementation in C. Compared to std::list this container provides more space efficient storage when bidirectional iteration is not needed.</p></blockquote></p>
+
+<p>以下是一個示範程式，裡面同時使用了<a href="http://candrews.net/blog/2011/07/understanding-c-0x-lambda-functions/">lambda expression</a>跟<a href="http://oopscenities.net/2011/06/09/c0x-range-based-for-loop/">Range-based for loop</a>，日後有時間在寫。</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;forward_list&gt;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">forward_list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="p">{</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">};</span>
+</span><span class='line'>    <span class="n">list</span><span class="p">.</span><span class="n">remove_if</span><span class="p">([](</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span> <span class="p">});</span> <span class="o">&lt;/</span><span class="kt">int</span><span class="o">&gt;&lt;/</span><span class="n">forward_list</span><span class="o">&gt;&lt;/</span><span class="n">iostream</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span> <span class="o">:</span> <span class="n">list</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">n</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="sc">&#39; &#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ar, ranlib, ld issue]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/01/10/ar-ranlib-ld-issue/"/>
+    <updated>2013-01-10T19:22:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/01/10/ar-ranlib-ld-issue</id>
+    <content type="html"><![CDATA[<p>在網路上找了一下ranlib的用法，發現這算是歷史共業之一。
+一開始的ar只是像tar一樣，負責打包所有的object file。而不用來處理linking時所需要的Archive index，這個部分交由ranlib來負責。
+後來發現這兩個部份可以合而為一，再加入或更新object file的時候，一同更新所需要的Archive Index。ranlib的功用就如同<code>ar -s</code>，為了維持相容性而留下來。</p>
+
+<p>以下是一個需要使用ranlib的例子，為了示範，使用特殊的設定，一般不會遇到這種問題。假設我們現在有個foo.o了，接著建立一個archive file。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">ar</span> rcS libTest.a foo.o
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+注意這邊的<strong>S</strong>選項，我們強迫不讓他產生Symbol table，現今的環境就算不加<strong>s</strong>也會產生Symbol tabl。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> main.c libTest.a -o main
+</span><span class='line'>libTest.a: could not read symbols: Archive has no index; run ranlib to add one
+</span><span class='line'>collect2: ld returned 1 exit status
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+用nm看一下libTest.a
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">nm</span> -s libTest.a&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;foo.o:
+</span><span class='line'>0000000000000000 T foo&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>nm對<code>-s</code>的說明如下 
+<blockquote><p>When listing symbols from archive members, include the index: a mapping (stored in the archive by ar or ranlib) of which modulescontain definitions for which names.</p></blockquote>
+以上的結果表示我們在archive file裡面沒有archive index的存在，這時候就該<code>ranlib</code>登場了</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">ranlib</span> libTest.a
+</span><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> test.c libTest.a -o test
+</span><span class='line'><span class="nv">$ </span>./test
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+再度用nm來看結果
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">nm</span> -s libTest.a
+</span><span class='line'>Archive index:
+</span><span class='line'>foo in foo.o&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;foo.o:
+</span><span class='line'>0000000000000000 T foo
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+現在看到Archive index被成功建立了</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Add resource files to executable/library for gcc]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/"/>
+    <updated>2013-01-10T19:22:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc</id>
+    <content type="html"><![CDATA[<p>在Stackoverflow看到<a href="http://stackoverflow.com/questions/4864866/c-c-with-gcc-statically-add-resource-files-to-executable-library">類似的問題</a>，紀錄一下
+假設我門需要把一個resource加入執行檔或Library，可以使用以下的方法
+假設我們現在有個檔案，叫做data
+裡面的內容還是我們的老朋友<code>Hello world!</code>
+有兩個方式可以達成</p>
+
+<h2 id="object-file">將檔案變成 object file</h2>
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">objcopy</span> -I binary -O elf64-x86-64 -B i386 data data.o
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+如果我們用nm來觀看其內容
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">nm</span> data.o
+</span><span class='line'>000000000000000d D _binary_data_end
+</span><span class='line'>000000000000000d A _binary_data_size
+</span><span class='line'>0000000000000000 D _binary_data_start
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+其中的<strong>A</strong>代表在之後的連結過程，其數值不會再之後的動作所更改。接著我們寫另外一段程式</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdio.h /&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="err">“</span><span class="n">_binary_data_start</span><span class="err">”</span><span class="p">);</span>
+</span><span class='line'><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data_size</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="err">“</span><span class="n">_binary_data_size</span><span class="err">”</span><span class="p">);</span>
+</span><span class='line'><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data_end</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="err">“</span><span class="n">_binary_data_end</span><span class="err">”</span><span class="p">);</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>        <span class="kt">char</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="n">c</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="n">c</span> <span class="o">=</span> <span class="n">my_data</span><span class="p">;</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">my_data_end</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="n">putchar</span><span class="p">(</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="n">c</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">printf</span><span class="p">(</span><span class="err">“</span><span class="n">String</span> <span class="n">length</span><span class="o">:</span> <span class="o">%</span><span class="n">ld</span><span class="err">\</span><span class="n">n</span><span class="err">”</span><span class="p">,</span>  <span class="p">(</span><span class="kt">long</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">my_data_size</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>編譯且執行他
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> test.c data.o -o test
+</span><span class='line'><span class="nv">$ </span>./test
+</span><span class='line'>Hello world!
+</span><span class='line'>String length: 13
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+從code可以看出，我們的<code>my_data</code>就是對應_binary_data_start的部分
+please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels.html#Asm-Labels">Controlling Names Used in Assembler Code</a></p>
+
+<p>重新用nm看產生的執行檔，關切我們在意的部分
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">nm</span> test
+</span><span class='line'>0000000000601035 D _binary_data_end
+</span><span class='line'>000000000000000d A _binary_data_size
+</span><span class='line'>0000000000601028 D _binary_data_start
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+發現_binary_data_start跟_binary_data_end在連結之後，都被重定位了。而_binary_data_size的位置保持不變，因此可以做為一個sentinel使用。</p>
+
+<h2 id="header-file-">將檔案變成單一header file (適用於各種編譯器)</h2>
+
+<p>利用工具將Binary Data轉成Header file，這邊用linux的xxd來做示範。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">xxd</span> xxd -i data data.h
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>重寫我們的程式
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">nclude</span> <span class="o">&lt;</span><span class="n">stdio</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span>
+</span><span class='line'><span class="cp">#include &quot;data.h&quot;&lt;/stdio.h&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">data_len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">putchar</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span><span class='line'>        <span class="n">printf</span><span class="p">(</span><span class="err">“</span><span class="n">String</span> <span class="n">length</span><span class="o">:</span> <span class="o">%</span><span class="n">d</span><span class="err">\</span><span class="n">n</span><span class="err">”</span><span class="p">,</span>  <span class="n">data_len</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>編譯且執行他
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> test.c -o test
+</span><span class='line'><span class="nv">$ </span>./test
+</span><span class='line'>Hello world!
+</span><span class='line'>String length: 13
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+可以得到跟上面一樣的結果。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[GCC Notes]]></title>
+    <link href="http://HungMingWu.github.com/blog/2012/12/20/gcc-notes/"/>
+    <updated>2012-12-20T10:59:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2012/12/20/gcc-notes</id>
+    <content type="html"><![CDATA[<h3 id="gcc-">gcc 常用參數介紹</h3>
+
+<ul>
+  <li>
+    <p>什麼參數都不加
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> hello.c
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+直接產生a.out</p>
+  </li>
+  <li>
+    <p>無連結選項
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> hello.c -o hello
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+直接產生可執行文件hello</p>
+  </li>
+  <li>
+    <p><code>-x language</code> filename 
+設定文件所使用的語言，使預設的附檔名失效，對之後的檔案也有效，除非你再次設定這個參數。可以使用的語言有C/C++等。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> -x c hello.pig
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+上面這個例子，就是將附檔名pig的檔案當作C語言來編譯。如果在後面加上了<code>-x none</code> filename，則會抵銷前面的作用，回復復育社規則來編譯。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> -x c hello.pig -x none hello2.c
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+  </li>
+  <li>
+    <p><code>-c</code>
+將程式碼生成至obj file後停止，預設附檔名是.o。</p>
+  </li>
+  <li>
+    <p><code>-S</code>
+將程式生成至Assembler Code後停止，預設附檔名是.s。</p>
+  </li>
+  <li>
+    <p><code>-E</code>
+只處理Preprocess的部份，跟上面兩者不同，不會產生檔案，需要用Redirect的方式產生文件。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> -E hello.c &amp;gt; hello.i
+</span><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> -E hello.c | less
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+  </li>
+  <li>
+    <p><code>-o</code> 
+指定輸出檔案名稱，可以跟上面參數合併使用。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> -S hello.c -o hello.asm
+</span><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> -c hello.c  -o hello.obj
+</span><span class='line'><span class="nv">$ </span><span class="nb">gcc</span> hello.c -o hello.exe
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+  </li>
+  <li><code>-ansi</code>
+關閉GNU C和ANSI C不相容的部分，在C模式相當於c90，在C++模式相當於C++98。如<code>asm</code>、``inline<code>、</code>typeof<code>等。如果你不考慮寫個標準的ISO C語言的話，在</code>-ansi<code>參數下還是能夠用</code><strong>asm</strong><code>、</code><strong>inline</strong><code>、</code><strong>typeof</strong>`等GCC拓展語法繼續工作。如果要避免這種情況，可以配合底下這個參數。</li>
+  <li><code>-pedandic</code>
+對所有不合乎C/C++ Standard的與法發出嚴重警告，</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

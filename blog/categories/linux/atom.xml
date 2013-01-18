@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: linux | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/categories/linux/atom.xml" rel="self"/>
+  <link href="http://HungMingWu.github.com/"/>
+  <updated>2013-01-18T23:19:26+08:00</updated>
+  <id>http://HungMingWu.github.com/</id>
+  <author>
+    <name><![CDATA[吳小明]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[如何使用gprof]]></title>
+    <link href="http://HungMingWu.github.com/blog/2012/10/04/gprof-usage/"/>
+    <updated>2012-10-04T18:00:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2012/10/04/gprof-usage</id>
+    <content type="html"><![CDATA[<p>gropf是gnu工具之一，在編譯的時候加入了profiling的source code，執行時統計user space的執行資料，可以得到每個function的被呼叫次數，執行時間，呼叫關係等。</p>
+
+<p>以下是一個簡單範例</p>
+
+<p><div><script src='https://gist.github.com/3833148.js'></script>
+<noscript><pre><code>int IsOdd(int x)
+{
+	return x &amp; 1;
+}
+int main(int argc, char *argv[])
+{
+	for (int i = 0; i &lt; 1000; i++) IsOdd(i);
+}</code></pre></noscript></div>
+</p>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<p>先用gcc編譯程式</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gcc hello.c -o hello -pg -g</span></code></pre></td></tr></table></div></figure></notextile></div>
+-pg表示開啟profiling功能，如果要得到帶注視的程式碼清單，需加上-g。</p>
+
+<p>執行程式
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./hello</span></code></pre></td></tr></table></div></figure></notextile></div>
+此時會產生 gmon.out檔</p>
+
+<p>使用gprof對程式進行分析
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gprof hello gmon.out -p</span></code></pre></td></tr></table></div></figure></notextile></div>
+得到每個函數所佔用的執行時間
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gprof hello gmon.out -q</span></code></pre></td></tr></table></div></figure></notextile></div>
+得到call graph，每個函數的呼叫關係，
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gprof hello gmon.out -A</span></code></pre></td></tr></table></div></figure></notextile></div>
+得到帶注釋的source code清單，列出每個函數的呼叫次數。</p>
+]]></content>
+  </entry>
+  
+</feed>

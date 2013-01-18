@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: FreebBSD | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/tags/freebbsd/atom.xml" rel="self"/>
+  <link href="http://HungMingWu.github.com/"/>
+  <updated>2013-01-18T23:19:26+08:00</updated>
+  <id>http://HungMingWu.github.com/</id>
+  <author>
+    <name><![CDATA[吳小明]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How to use ports on FreeBSD]]></title>
+    <link href="http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd/"/>
+    <updated>2012-12-07T08:57:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd</id>
+    <content type="html"><![CDATA[<p>ports是FreeBSD安裝軟體的主要途徑，在安裝FreeBSD的時候記得選取<strong>Port Collection</strong>。</p>
+
+<p>Portsnap 是 FreeBSD 6.0之後所採用的更新Ports方案，以下是簡單介紹。</p>
+
+<h3 id="portsnap">首次使用 Portsnap</h3>
+<p>首先使用 <strong>portsnap fetch</strong> 抓取Server中的Snapshot，接著使用 <strong>portsnap extract</strong>解開存入/usr/ports中。 兩個指令也可以合併一起使用 <strong>portsnap fetch extract</strong>。</p>
+
+<h3 id="portsnap-1">更新 Portsnap</h3>
+<p>跟上面一樣的方法，先 <strong>portsnap fetch</strong>抓取Snapshot，接著<strong>portsnap update</strong>更新ports資料：也可以<strong>portsnap fetch update</strong>一起使用。</p>
+
+<h3 id="ports-">如何在 ports 裡面找尋軟體</h3>
+<p>在 /usr/ports下，打上 <strong>make search name=”xxx”</strong>*，就可以找到xxx有關的ports。</p>
+
+<h3 id="section">如何安裝軟體</h3>
+<p>在對應的 ports中，打上 <strong>make install</strong> 即可安裝，<strong>make clean</strong> 會將中間產物清除，同樣的可以使用 <strong>make install clean</strong>來完成上面兩件事。</p>
+
+<h3 id="section-1">如何移除已安裝的軟體</h3>
+<p>同樣進入對應的ports，打上 <strong>make deinstall</strong></p>
+
+<h3 id="section-2">如何一次更新所有安裝過的軟體</h3>
+<p>先從ports當中安裝portmaster。更新port colecction，接著打<strong>portmaster -ayD</strong>全部更新，要對portmaster有更進一步了解，請參考底下網頁。</p>
+
+<h3 id="section-3">參考資料</h3>
+<p><a href="http://www.freebsd.org/zh/FAQ/ports.html">1. Ports and Packages 常見問題</a></p>
+
+<p><a href="http://pgx.servu.tw/2012/08/01/portmaster/">2. 系統 Ports 軟體升級工具： portmaster</a></p>
+
+]]></content>
+  </entry>
+  
+</feed>

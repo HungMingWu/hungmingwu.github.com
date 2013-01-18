@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>JNI Tutorial - 第十三號艦隊</title>
+  <meta name="author" content="吳小明">
+
+  
+  <meta name="description" content="記錄一下JNI的建立跟使用方法，在Linux底下驗證成功。
+以下是一個簡單的範例 class HelloWorld { public native void sayHello(); static { System.loadLibrary(&quot;HelloWorld&quot;); } &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/2012/11/08/jni-tutorial/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="第十三號艦隊" type="application/atom+xml">
+  ﻿<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第十三號艦隊</a></h1>
+  
+    <h2>用文字來記錄我和我的一切</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:HungMingWu.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">JNI Tutorial</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-08T11:49:00+08:00" pubdate data-updated="true">Nov 8<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>記錄一下JNI的建立跟使用方法，在Linux底下驗證成功。
+以下是一個簡單的範例</p>
+
+<div><script src="https://gist.github.com/4036678.js?file=HelloWorld.java"></script>
+<noscript><pre><code>class HelloWorld {
+    public native void sayHello();
+    static {
+        System.loadLibrary(&quot;HelloWorld&quot;);
+    }
+    public static void main(String[] args) {
+        (new HelloWorld()).sayHello();
+    }
+}
+</code></pre></noscript></div>
+
+<p>裡面做的事情很簡單，載入Shared Object，呼叫 Native Code。</p>
+
+<p>第一步： 接著編譯 Java Code 產生 class 檔</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">javac</span> HelloWorld.java
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>第二步： 產生 HelloWorld.h Header File</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">javah</span> -jni HelloWorld.
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>產生出來的 Header File長這個樣子</p>
+<div><script src="https://gist.github.com/4036678.js?file=HelloWorld.h"></script>
+<noscript><pre><code>/* DO NOT EDIT THIS FILE - it is machine generated */
+#include &lt;jni.h&gt;
+/* Header for class HelloWorld */
+
+#ifndef _Included_HelloWorld
+#define _Included_HelloWorld
+#ifdef __cplusplus
+extern &quot;C&quot; {
+#endif
+/*
+ * Class:     HelloWorld
+ * Method:    sayHello
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_HelloWorld_sayHello
+  (JNIEnv *, jobject);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+</code></pre></noscript></div>
+
+<p>第三步： 撰寫對應的Native Code
+做的事情也很簡單，就是印出Hello World而已</p>
+<div><script src="https://gist.github.com/4036678.js?file=HelloWorld.c"></script>
+<noscript><pre><code>#include &lt;jni.h&gt;
+#include &quot;HelloWorld.h&quot;
+#include &lt;stdio.h&gt;
+
+JNIEXPORT void JNICALL Java_HelloWorld_sayHello (JNIEnv *env, jobject obj) {
+    printf(&quot;Hello,the World!!!\n&quot;);
+}
+</code></pre></noscript></div>
+
+<p>第四步： 產生 Shared Object</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -I<span class="s2">&quot;/usr/lib/jvm/java-7-openjdk-amd64/include&quot;</span> -fPIC -shared -o libHelloWorld.so HelloWorld.c
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>此時libHelloWorld.so會跟HelloWorld.class在同一個目錄中
+第五步：  執行，將LibraryPath指向當前目錄
+&gt; java -Djava.library.path=<code>pwd</code> HelloWorld</p>
+
+<p>可以看到正確的結果。</p>
+
+<p>之前是介紹如何從 Java 呼叫 C++ 的 Native Code，現在要說的是如何從C++建立 Java Virtual Machine，進而執行 Java Code。</p>
+
+<p>第一步: 寫好Java Code且編譯
+這裡準備的 Java Code</p>
+<div><script src="https://gist.github.com/4037503.js?file=HelloWorld.java"></script>
+<noscript><pre><code>public class HelloWorld {
+        public static void main(String[] args) {
+                System.out.println(&quot;Hello, World in Java&quot;);
+        }
+}</code></pre></noscript></div>
+
+<p>編譯它</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">javac</span> HelloWorld.java
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>第二步：撰寫C++的程式碼且編譯</p>
+<div><script src="https://gist.github.com/4037503.js?file=Hello.cpp"></script>
+<noscript><pre><code>#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;jni.h&gt;
+
+int main (int argc, char *argv[])
+{
+        JavaVM *jvm;                    /* 宣告一個java machine */
+        JNIEnv *env;                    /* JNI的環境 */
+        JavaVMInitArgs vm_args;
+
+        /*自定義JRE所要的參數，就是java -... -... xxx.java將-...字串加入options中 用*/
+        JavaVMOption options[1];
+
+        jint res;
+        jclass cls;
+        jmethodID mid;
+
+
+        vm_args.version = JNI_VERSION_1_6;  /*使用的版本*/
+        options[0].optionString = &quot;-Djava.class.path=./&quot;;
+        vm_args.nOptions = 1;
+        vm_args.options = options;
+        vm_args.ignoreUnrecognized = JNI_FALSE;
+
+        /*產生一個java machine*/
+        res = JNI_CreateJavaVM(&amp;jvm,(void**)&amp;env,&amp;vm_args);
+
+        jclass ver;
+        jmethodID print;
+
+        /*找Helloworld Class*/
+        cls = env-&gt;FindClass(&quot;HelloWorld&quot;);  
+
+        if (cls == 0) printf(&quot;cls error \n&quot;);
+
+        /*&gt;確定要執行的 function是甚麼 
+           在這裡指的是HelloWorld裡的main 
+           後面是main要傳的參數*/
+        mid = env-&gt;GetStaticMethodID(cls, &quot;main&quot;, &quot;([Ljava/lang/String;)V&quot;); 
+
+        if (mid == 0) printf(&quot;mid error \n&quot;);
+
+        env-&gt;CallStaticVoidMethod(cls, mid); /*執行此class*/
+
+        printf(&quot;Hello in c\n&quot;);
+        return 0;
+}</code></pre></noscript></div>
+
+<p>編譯它</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">g</span>++ -I<span class="s2">&quot;/usr/lib/jvm/java-7-openjdk-amd64/include&quot;</span>  -L<span class="s2">&quot;/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server&quot;</span> Hello.cpp -ljvm -o Hello
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>第三歩: 設定 LD_LIBRARY_PATH</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">export</span> LD_LIBRARY_PATH<span class="err">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>第四歩： 執行程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span>./Hello
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">吳小明</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-11-08T11:49:00+08:00" pubdate data-updated="true">Nov 8<span>th</span>, 2012</time>
+      
+
+
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2012/11/08/jni-tutorial/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2012/11/08/jni-tutorial/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/10/04/gprof-usage/" title="Previous Post: 如何使用gprof">&laquo; 如何使用gprof</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/11/09/find-text-pattern-in-files-on-linux/" title="Next Post: Find text pattern in files on Linux">Find text pattern in files on Linux &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/01/14/setup-ssh-server-in-ubuntu/">如何在ubuntu中設定ssh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/">如何從一個Singly linked linear list中刪除資料</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/10/ar-ranlib-ld-issue/">ar, ranlib, ld issue</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">Add resource files to executable/library for gcc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/HungMingWu">@HungMingWu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'HungMingWu',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - 吳小明 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'littlewhite0816';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://HungMingWu.github.com/blog/2012/11/08/jni-tutorial/';
+        var disqus_url = 'http://HungMingWu.github.com/blog/2012/11/08/jni-tutorial/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,368 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Incomplete class types for C++ - 第十三號艦隊</title>
+  <meta name="author" content="吳小明">
+
+  
+  <meta name="description" content="先從 C++ Standard看起 The C++ Standard allows, in 5.3.5/5, pointers to incomplete class types to be deleted with a delete-expression. When the class has &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="第十三號艦隊" type="application/atom+xml">
+  ﻿<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第十三號艦隊</a></h1>
+  
+    <h2>用文字來記錄我和我的一切</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:HungMingWu.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Incomplete class types for C++</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-05T15:32:00+08:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>先從 C++ Standard看起</p>
+
+<blockquote><p>The C++ Standard allows, in 5.3.5/5, pointers to incomplete class types to be deleted with a delete-expression. When the class has a non-trivial destructor, or a class-specific operator delete, the behavior is undefined. Some compilers issue a warning when an incomplete type is deleted, but unfortunately, not all do, and programmers sometimes ignore or disable warnings.</p></blockquote>
+
+<p>當呼叫deleter時，僅會釋放pointer所佔據的空間，由於不知道他的Destructor有沒有其他的行為，因此不會呼叫其Destructor。</p>
+
+<p>以下是一個範例</p>
+
+<div><script src="https://gist.github.com/4213523.js"></script>
+<noscript><pre><code>#include &quot;deleter.h&quot;
+void delete_object(Object* p) 
+{ 
+	delete p; 
+}</code></pre></noscript></div>
+
+<p>在各大編譯器下給出的錯誤訊息
+#### Visual Studio ####</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">warning C4150: deletion of pointer to incomplete type 'Object'; no destructor called</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h4 id="gcc">GCC</h4>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">deleter.cpp: In function 'void delete_object(Object*)':
+</span><span class="line">deleter.cpp:4: warning: possible problem detected in invocation of delete operator:
+</span><span class="line">deleter.cpp:2: warning: 'p' has incomplete type
+</span><span class="line">deleter.h:1: warning: forward declaration of 'struct Object'
+</span><span class="line">deleter.cpp:4: note: neither the destructor nor the class-specific operator delete will be called, even if they are declared when the class is defined.</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h4 id="clang">clang</h4>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">deleter.cpp:4:2: warning: deleting pointer to incomplete type 'Object' may cause
+</span><span class="line">      undefined behaviour
+</span><span class="line">        delete p; 
+</span><span class="line">        ^      ~
+</span><span class="line">./deleter.h:1:7: note: forward declaration of 'Object'
+</span><span class="line">class Object;
+</span><span class="line">      ^
+</span><span class="line">1 warning generated.</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>解決方式也很簡單，在deleter.cpp中加入 <strong>#include “object.h”</strong> 即可。</p>
+
+<p>或是參考 <a href="http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Checked_delete">Check Delete Item</a></p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">吳小明</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-05T15:32:00+08:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
+      
+
+
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/12/05/introduction-valgrind/" title="Previous Post: Introduction Valgrind">&laquo; Introduction Valgrind</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/12/07/how-to-use-ports-on-freebsd/" title="Next Post: How to use ports on FreeBSD">How to use ports on FreeBSD &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/01/14/setup-ssh-server-in-ubuntu/">如何在ubuntu中設定ssh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/">如何從一個Singly linked linear list中刪除資料</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/10/ar-ranlib-ld-issue/">ar, ranlib, ld issue</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">Add resource files to executable/library for gcc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/HungMingWu">@HungMingWu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'HungMingWu',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - 吳小明 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'littlewhite0816';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/';
+        var disqus_url = 'http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

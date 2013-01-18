@@ -1,0 +1,451 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Add resource files to executable/library for gcc - 第十三號艦隊</title>
+  <meta name="author" content="吳小明">
+
+  
+  <meta name="description" content="在Stackoverflow看到類似的問題，紀錄一下
+假設我門需要把一個resource加入執行檔或Library，可以使用以下的方法
+假設我們現在有個檔案，叫做data
+裡面的內容還是我們的老朋友Hello world!
+有兩個方式可以達成 將檔案變成 object file 1
+$ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="第十三號艦隊" type="application/atom+xml">
+  ﻿<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第十三號艦隊</a></h1>
+  
+    <h2>用文字來記錄我和我的一切</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:HungMingWu.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Add resource files to executable/library for gcc</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-10T19:22:00+08:00" pubdate data-updated="true">Jan 10<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>在Stackoverflow看到<a href="http://stackoverflow.com/questions/4864866/c-c-with-gcc-statically-add-resource-files-to-executable-library">類似的問題</a>，紀錄一下
+假設我門需要把一個resource加入執行檔或Library，可以使用以下的方法
+假設我們現在有個檔案，叫做data
+裡面的內容還是我們的老朋友<code>Hello world!</code>
+有兩個方式可以達成</p>
+
+<h2 id="object-file">將檔案變成 object file</h2>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">objcopy</span> -I binary -O elf64-x86-64 -B i386 data data.o
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>如果我們用nm來觀看其內容</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">nm</span> data.o
+</span><span class="line">000000000000000d D _binary_data_end
+</span><span class="line">000000000000000d A _binary_data_size
+</span><span class="line">0000000000000000 D _binary_data_start
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>其中的<strong>A</strong>代表在之後的連結過程，其數值不會再之後的動作所更改。接著我們寫另外一段程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="s">&quot;_binary_data_start&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data_size</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="s">&quot;_binary_data_size&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data_end</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="s">&quot;_binary_data_end&quot;</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">        <span class="kt">char</span> <span class="o">*</span><span class="n">c</span><span class="p">;</span>
+</span><span class="line">        <span class="k">for</span> <span class="p">(</span><span class="n">c</span> <span class="o">=</span> <span class="n">my_data</span><span class="p">;</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">my_data_end</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="n">putchar</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">);</span>
+</span><span class="line">        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;String length: %ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>  <span class="p">(</span><span class="kt">long</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">my_data_size</span><span class="p">);</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>編譯且執行他</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> test.c data.o -o test
+</span><span class="line"><span class="nv">$ </span>./test
+</span><span class="line">Hello world!
+</span><span class="line">String length: 13
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>從code可以看出，我們的<code>my_data</code>就是對應_binary_data_start的部分
+please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels.html#Asm-Labels">Controlling Names Used in Assembler Code</a></p>
+
+<p>重新用nm看產生的執行檔，關切我們在意的部分</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">nm</span> test
+</span><span class="line">0000000000601035 D _binary_data_end
+</span><span class="line">000000000000000d A _binary_data_size
+</span><span class="line">0000000000601028 D _binary_data_start
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>發現_binary_data_start跟_binary_data_end在連結之後，都被重定位了。而_binary_data_size的位置保持不變，因此可以做為一個sentinel使用。</p>
+
+<h2 id="header-file-">將檔案變成單一header file (適用於各種編譯器)</h2>
+
+<p>利用工具將Binary Data轉成Header file，這邊用linux的xxd來做示範。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">xxd</span> xxd -i data data.h
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>重寫我們的程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">nclude</span> <span class="o">&lt;</span><span class="n">stdio</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span>
+</span><span class="line"><span class="cp">#include &quot;data.h&quot;</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">        <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span><span class="line">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">data_len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">putchar</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span><span class="line">        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;String length: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>  <span class="n">data_len</span><span class="p">);</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>編譯且執行他</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> test.c -o test
+</span><span class="line"><span class="nv">$ </span>./test
+</span><span class="line">Hello world!
+</span><span class="line">String length: 13
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>可以得到跟上面一樣的結果。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">吳小明</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-10T19:22:00+08:00" pubdate data-updated="true">Jan 10<span>th</span>, 2013</time>
+      
+
+<span class="categories">
+  Category:
+  
+    <a class='category' href='/blog/categories/programming/'>programming</a>
+  
+</span>
+
+
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2012/12/20/gcc-notes/" title="Previous Post: GCC Notes">&laquo; GCC Notes</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2013/01/10/ar-ranlib-ld-issue/" title="Next Post: ar, ranlib, ld issue">ar, ranlib, ld issue &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/01/14/setup-ssh-server-in-ubuntu/">如何在ubuntu中設定ssh</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/">如何從一個Singly linked linear list中刪除資料</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/10/ar-ranlib-ld-issue/">ar, ranlib, ld issue</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">Add resource files to executable/library for gcc</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/HungMingWu">@HungMingWu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'HungMingWu',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - 吳小明 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'littlewhite0816';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/';
+        var disqus_url = 'http://HungMingWu.github.com/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
