@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: C++0x | 第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/blog/tags/c-0x/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-01-22T20:50:13+08:00</updated>
+  <updated>2013-01-22T21:03:21+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -116,23 +116,23 @@ auto_ptr的問題是沒有**Copy Semantics**，他的Copy Constructur裡面做�
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">template</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span>  <span class="kr">typename</span> <span class="n">_Tp</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">template</span> <span class="o">&lt;</span><span class="kr">typename</span> <span class="n">_tp</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="o">&gt;</span>
 </span><span class='line'><span class="n">class</span> <span class="n">auto_ptr</span> <span class="p">{</span>
 </span><span class='line'><span class="nl">private:</span>
 </span><span class='line'>	<span class="n">_Tp</span><span class="o">*</span> <span class="n">_M_ptr</span><span class="p">;</span>
 </span><span class='line'><span class="nl">public:</span>
-</span><span class='line'>	<span class="n">auto_ptr</span><span class="p">(</span><span class="n">auto_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">__a</span><span class="p">)</span> <span class="n">throw</span><span class="p">()</span> <span class="o">:</span> <span class="n">_M_ptr</span><span class="p">(</span><span class="n">__a</span><span class="p">.</span><span class="n">release</span><span class="p">())</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class='line'>    <span class="n">_Tp</span><span class="o">*</span> <span class="n">release</span><span class="p">()</span> <span class="n">throw</span><span class="p">()</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>        <span class="n">element_type</span><span class="o">*</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="n">_M_ptr</span><span class="p">;</span>
-</span><span class='line'>        <span class="n">_M_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
+</span><span class='line'>	<span class="n">auto_ptr</span><span class="p">(</span><span class="n">auto_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">__a</span><span class="p">)</span> <span class="n">throw</span><span class="p">()</span> <span class="o">:</span> <span class="n">_M_ptr</span><span class="p">(</span><span class="n">__a</span><span class="p">.</span><span class="n">release</span><span class="p">())</span> <span class="p">{}</span>
+</span><span class='line'>	<span class="n">_Tp</span><span class="o">*</span> <span class="n">release</span><span class="p">()</span> <span class="n">throw</span><span class="p">()</span>
+</span><span class='line'>	<span class="p">{</span>
+</span><span class='line'>		<span class="n">element_type</span><span class="o">*</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="n">_M_ptr</span><span class="p">;</span>
+</span><span class='line'>		<span class="n">_M_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>		<span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 於是在執行完Test之後，main中的v裡面的pointer就被清空，無法正常使用。
 由於這個緣故，STL的各種容器跟演算法，搭配上auto_ptr或多或少都有問題。在經過多次修改之後還是無法修復，於是auto_ptr在C++0x之後就標繼承**deprecated**了，不建議使用。
-由於C++0x引進了Rvalue reference，因此新的unique_ptr就此登場。</int></int></p>
+由於C++0x引進了Rvalue reference，因此新的unique_ptr就此登場。</typename></int></int></p>
 
 <h2 id="uniqueptr">unique_ptr</h2>
 <p>unique_ptr能做的事幾乎跟auto_ptr一樣，除了少數例外。

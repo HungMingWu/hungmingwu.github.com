@@ -245,19 +245,19 @@ auto_ptr的問題是沒有<strong>Copy Semantics</strong>，他的Copy Construct
 <span class="line-number">11</span>
 <span class="line-number">12</span>
 <span class="line-number">13</span>
-</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">template</span><span class="o">&lt;</span>  <span class="kr">typename</span> <span class="n">_Tp</span><span class="o">&gt;</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">template</span> <span class="o">&lt;</span><span class="kr">typename</span> <span class="n">_Tp</span><span class="o">&gt;</span>
 </span><span class="line"><span class="n">class</span> <span class="n">auto_ptr</span> <span class="p">{</span>
 </span><span class="line"><span class="nl">private:</span>
 </span><span class="line">	<span class="n">_Tp</span><span class="o">*</span> <span class="n">_M_ptr</span><span class="p">;</span>
 </span><span class="line"><span class="nl">public:</span>
-</span><span class="line">	<span class="n">auto_ptr</span><span class="p">(</span><span class="n">auto_ptr</span><span class="o">&amp;</span> <span class="n">__a</span><span class="p">)</span> <span class="n">throw</span><span class="p">()</span> <span class="o">:</span> <span class="n">_M_ptr</span><span class="p">(</span><span class="n">__a</span><span class="p">.</span><span class="n">release</span><span class="p">())</span> <span class="p">{</span> <span class="p">}</span>
-</span><span class="line">    <span class="n">_Tp</span><span class="o">*</span> <span class="n">release</span><span class="p">()</span> <span class="n">throw</span><span class="p">()</span>
-</span><span class="line">    <span class="p">{</span>
-</span><span class="line">        <span class="n">element_type</span><span class="o">*</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="n">_M_ptr</span><span class="p">;</span>
-</span><span class="line">        <span class="n">_M_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class="line">        <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
-</span><span class="line">    <span class="p">}</span>
-</span><span class="line"><span class="p">}</span>
+</span><span class="line">	<span class="n">auto_ptr</span><span class="p">(</span><span class="n">auto_ptr</span><span class="o">&amp;</span> <span class="n">__a</span><span class="p">)</span> <span class="n">throw</span><span class="p">()</span> <span class="o">:</span> <span class="n">_M_ptr</span><span class="p">(</span><span class="n">__a</span><span class="p">.</span><span class="n">release</span><span class="p">())</span> <span class="p">{}</span>
+</span><span class="line">	<span class="n">_Tp</span><span class="o">*</span> <span class="n">release</span><span class="p">()</span> <span class="n">throw</span><span class="p">()</span>
+</span><span class="line">	<span class="p">{</span>
+</span><span class="line">		<span class="n">element_type</span><span class="o">*</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="n">_M_ptr</span><span class="p">;</span>
+</span><span class="line">		<span class="n">_M_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">		<span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+</span><span class="line">	<span class="p">}</span>
+</span><span class="line"><span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>於是在執行完Test之後，main中的v裡面的pointer就被清空，無法正常使用。
