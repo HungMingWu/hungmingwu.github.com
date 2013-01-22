@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: C++ | 第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/blog/tags/c-/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-01-22T21:03:21+08:00</updated>
+  <updated>2013-01-22T21:38:32+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -102,7 +102,7 @@
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 以上的程式碼，看起來沒什麼問題，不過實際執行就Crash了。
 auto_ptr的問題是沒有**Copy Semantics**，他的Copy Constructur裡面做的是Move的動作。
-以下是Gauto_ptr的Conpy Constructor實作簡化版
+以下是auto_ptr的Conpy Constructor實作簡化版
 <div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -166,12 +166,12 @@ auto_ptr的問題是沒有**Copy Semantics**，他的Copy Constructur裡面做�
 </span><span class='line'><span class="n">class</span> <span class="n">unique_ptr</span>
 </span><span class='line'><span class="p">{</span>
 </span><span class='line'><span class="nl">private:</span>
-</span><span class='line'>	<span class="n">unique_ptr</span><span class="p">(</span><span class="k">const</span> <span class="n">_Myt</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;);</span>			<span class="c1">// not defined</span>
-</span><span class='line'>	<span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">_Myt</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;);</span>	<span class="c1">// not defined</span>
+</span><span class='line'>	<span class="n">unique_ptr</span><span class="p">(</span><span class="k">const</span> <span class="n">_Myt</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;);</span>				<span class="c1">// not defined</span>
+</span><span class='line'>	<span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">_Myt</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;);</span>		<span class="c1">// not defined</span>
 </span><span class='line'><span class="nl">public:</span>
 </span><span class='line'>	<span class="n">unique_ptr</span><span class="p">(</span><span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">_Right</span><span class="p">)</span> 			<span class="n">_NOEXCEPT</span><span class="p">;</span>
 </span><span class='line'>	<span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">_Right</span><span class="p">)</span>	<span class="n">_NOEXCEPT</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 如果要得到更多的Rvalue Refenece的相關內容，請參考這篇[Rvalue References: C++0x Features in VC10, Part 2](http://blogs.msdn.com/b/vcblog/archive/2009/02/03/rvalue-references-c-0x-features-in-vc10-part-2.aspx)。</int></int></int></int></int></int></p>
 
