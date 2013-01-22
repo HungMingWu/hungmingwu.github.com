@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Tag: C++ | 第十三號艦隊]]></title>
-  <link href="http://HungMingWu.github.com/blog/tags/c-/atom.xml" rel="self"/>
+  <title><![CDATA[Tag: C++0x | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/tags/c-0x/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
   <updated>2013-01-22T20:50:13+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
@@ -229,136 +229,6 @@ auto_ptr的問題是沒有**Copy Semantics**，他的Copy Constructur裡面做�
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">auto</span> <span class="n">del</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">p</span><span class="p">[])</span> <span class="p">{</span> <span class="n">delete</span> <span class="p">[]</span> <span class="n">p</span><span class="p">;</span> <span class="p">};</span>
 </span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">int</span> <span class="p">[],</span> <span class="n">decltype</span><span class="p">(</span><span class="n">del</span><span class="p">)</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">px</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">del</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[如何從一個Singly linked linear list中刪除資料]]></title>
-    <link href="http://HungMingWu.github.com/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/"/>
-    <updated>2013-01-14T22:08:00+08:00</updated>
-    <id>http://HungMingWu.github.com/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list</id>
-    <content type="html"><![CDATA[<p>要從一個<strong>singly lisked linerar list</strong>中刪除文件，最簡單的方式莫過於用一個指標指向前一個node，如果現在的item需要刪除，將前面一項item指向後面的item即可。</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">node</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span> <span class="n">next</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span> <span class="n">node</span><span class="p">;</span>  <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">node</span> <span class="o">*</span><span class="n">remove_if</span><span class="p">(</span><span class="n">node</span> <span class="o">*</span> <span class="n">head</span><span class="p">,</span> <span class="n">remove_fn</span> <span class="n">rm</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>     <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">node</span> <span class="o">*</span><span class="n">prev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span> <span class="n">curr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="p">)</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="p">{</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>            <span class="n">node</span> <span class="o">*</span> <span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">rm</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>            <span class="p">{</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>                    <span class="k">if</span> <span class="p">(</span><span class="n">prev</span><span class="p">)</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>                            <span class="n">prev</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>                    <span class="k">else</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>                            <span class="n">head</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>                    <span class="n">free</span><span class="p">(</span><span class="n">curr</span><span class="p">);</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>            <span class="p">}</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>            <span class="k">else</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>                    <span class="n">prev</span> <span class="o">=</span> <span class="n">curr</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>            <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="p">}</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">head</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
-</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>有人提出了更精巧的方法，利用<strong>two star pointer</strong>來達成，也就是指標的指標。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">remove_if</span><span class="p">(</span><span class="n">node</span> <span class="o">&lt;</span><span class="n">strong</span><span class="o">&gt;</span><span class="n">head</span><span class="p">,</span> <span class="n">remove_fn</span> <span class="n">rm</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">node</span><span class="o">&lt;/</span><span class="n">strong</span><span class="o">&gt;</span> <span class="n">curr</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span> <span class="o">*</span><span class="n">curr</span><span class="p">;</span> <span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>            <span class="n">node</span> <span class="o">*</span> <span class="n">entry</span> <span class="o">=</span> <span class="o">*</span><span class="n">curr</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">rm</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
-</span><span class='line'>            <span class="p">{</span>
-</span><span class='line'>                    <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">entry</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span>
-</span><span class='line'>                    <span class="n">free</span><span class="p">(</span><span class="n">entry</span><span class="p">);</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>            <span class="k">else</span>
-</span><span class='line'>                    <span class="n">curr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">entry</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>在C++11的年代，增加了<code>forward_list</code>，省得自己造輪子的麻煩。
-以下是forward_list的介紹。
-<blockquote><p>std::forward_list is a container that supports fast insertion and removal of elements from anywhere in the container. Fast random access is not supported. It is implemented as singly-linked list and essentially does not have any overhead compared to its implementation in C. Compared to std::list this container provides more space efficient storage when bidirectional iteration is not needed.</p></blockquote></p>
-
-<p>以下是一個示範程式，裡面同時使用了<a href="http://candrews.net/blog/2011/07/understanding-c-0x-lambda-functions/">lambda expression</a>跟<a href="http://oopscenities.net/2011/06/09/c0x-range-based-for-loop/">Range-based for loop</a>，日後有時間在寫。</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;forward_list&gt;</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">forward_list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="p">{</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">};</span>
-</span><span class='line'>    <span class="n">list</span><span class="p">.</span><span class="n">remove_if</span><span class="p">([](</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span> <span class="p">});</span> <span class="o">&lt;/</span><span class="kt">int</span><span class="o">&gt;&lt;/</span><span class="n">forward_list</span><span class="o">&gt;&lt;/</span><span class="n">iostream</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span> <span class="o">:</span> <span class="n">list</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">n</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="sc">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>

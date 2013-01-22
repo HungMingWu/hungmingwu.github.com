@@ -9,9 +9,21 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="安裝openssh-server 1
-$ apt-get install openssh-server 現在就可以用Putty從遠端登入了，如果要有更佳的安全性，需要做進一步的設定。 修改sshd_config
-這個檔案位在/etc/ssh/sshd_config。 禁止root帳號login &hellip;">
+  <meta name="description" content="C語言時期
+在C語言中，最常遇到的情況就是忘了釋放記憶體，然後造成Memory Leak的問題。
+例如以下這段程式 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+void LeakDemo(char path1, char path2)
+{ void *alloc = malloc(16); &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -23,6 +35,8 @@ $ apt-get install openssh-server 現在就可以用Putty從遠端登入了，如
   <link rel="canonical" href="http://HungMingWu.github.com/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="/javascripts/ender.js"></script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
@@ -98,6 +112,272 @@ $ apt-get install openssh-server 現在就可以用Putty從遠端登入了，如
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-20T20:17:00+08:00" pubdate data-updated="true">Jan 20<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="c">C語言時期</h2>
+<p>在C語言中，最常遇到的情況就是忘了釋放記憶體，然後造成Memory Leak的問題。
+例如以下這段程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="kt">void</span> <span class="nf">LeakDemo</span><span class="p">(</span><span class="kt">char</span> <span class="n">path1</span><span class="p">,</span> <span class="kt">char</span> <span class="n">path2</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="kt">void</span> <span class="o">*</span><span class="n">alloc</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="mi">16</span><span class="p">);</span>
+</span><span class="line">	<span class="k">if</span> <span class="p">(</span><span class="n">path1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">		<span class="n">free</span><span class="p">(</span><span class="n">alloc</span><span class="p">);</span>
+</span><span class="line">		<span class="k">return</span><span class="p">;</span>
+</span><span class="line">	<span class="p">}</span>
+</span><span class="line">	<span class="k">if</span> <span class="p">(</span><span class="n">path2</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span><span class="line">	<span class="n">free</span><span class="p">(</span><span class="n">alloc</span><span class="p">);</span>
+</span><span class="line">	<span class="k">return</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在上面這段程式裡面，path2就忘了釋放記憶體，然後造成Leak。
+這是語言上的侷限，只能靠多檢查source code跟使用工具來減少這種問題。</p>
+
+<h2 id="c98">C++98時期</h2>
+<p>由於C++有<a href="http://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization">RAII idiom</a>之後，對於釋放記憶體的事情就變得簡單很多了。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">struct</span> <span class="n">StackObject</span> <span class="p">{</span>
+</span><span class="line">	<span class="kt">void</span> <span class="o">*</span><span class="n">alloc</span><span class="p">;</span>
+</span><span class="line">	<span class="n">StackObject</span><span class="p">(</span><span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">		<span class="n">alloc</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+</span><span class="line">	<span class="p">}</span>
+</span><span class="line">	<span class="o">~</span><span class="n">StackObject</span><span class="p">()</span> <span class="p">{</span>
+</span><span class="line">		<span class="n">free</span><span class="p">(</span><span class="n">alloc</span><span class="p">);</span>
+</span><span class="line">	<span class="p">}</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="kt">void</span> <span class="nf">NoLeakDemo</span><span class="p">(</span><span class="kt">char</span> <span class="n">path1</span><span class="p">,</span> <span class="kt">char</span> <span class="n">path2</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">StackObject</span> <span class="n">s</span><span class="p">(</span><span class="mi">16</span><span class="p">);</span>
+</span><span class="line">	<span class="k">if</span> <span class="p">(</span><span class="n">path1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span><span class="line">	<span class="k">if</span> <span class="p">(</span><span class="n">path2</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+</span><span class="line">	<span class="k">return</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而為了一般化，STL裡面時做了一個<code>auto_ptr</code>，利用Template跟RAII的觀念來管理記憶體。
+## auto_ptr的問題
+如果把auto_ptr侷限於上面的用法，不會遇上什麼問題，一旦要搭配現有的程式碼，當參數傳來傳去，問題就出現了其中最嚴重的問題莫過於</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="kt">void</span> <span class="nf">Test</span><span class="p">(</span><span class="n">auto_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class="line"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">        <span class="n">auto_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">4</span><span class="p">));</span>
+</span><span class="line">        <span class="n">Test</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>
+</span><span class="line">        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">v</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>以上的程式碼，看起來沒什麼問題，不過實際執行就Crash了。
+auto_ptr的問題是沒有<strong>Copy Semantics</strong>，他的Copy Constructur裡面做的是Move的動作。
+以下是Gauto_ptr的Conpy Constructor實作簡化版</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">template</span><span class="o">&lt;</span>  <span class="kr">typename</span> <span class="n">_Tp</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">class</span> <span class="n">auto_ptr</span> <span class="p">{</span>
+</span><span class="line"><span class="nl">private:</span>
+</span><span class="line">	<span class="n">_Tp</span><span class="o">*</span> <span class="n">_M_ptr</span><span class="p">;</span>
+</span><span class="line"><span class="nl">public:</span>
+</span><span class="line">	<span class="n">auto_ptr</span><span class="p">(</span><span class="n">auto_ptr</span><span class="o">&amp;</span> <span class="n">__a</span><span class="p">)</span> <span class="n">throw</span><span class="p">()</span> <span class="o">:</span> <span class="n">_M_ptr</span><span class="p">(</span><span class="n">__a</span><span class="p">.</span><span class="n">release</span><span class="p">())</span> <span class="p">{</span> <span class="p">}</span>
+</span><span class="line">    <span class="n">_Tp</span><span class="o">*</span> <span class="n">release</span><span class="p">()</span> <span class="n">throw</span><span class="p">()</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">element_type</span><span class="o">*</span> <span class="n">__tmp</span> <span class="o">=</span> <span class="n">_M_ptr</span><span class="p">;</span>
+</span><span class="line">        <span class="n">_M_ptr</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">        <span class="k">return</span> <span class="n">__tmp</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>於是在執行完Test之後，main中的v裡面的pointer就被清空，無法正常使用。
+由於這個緣故，STL的各種容器跟演算法，搭配上auto_ptr或多或少都有問題。在經過多次修改之後還是無法修復，於是auto_ptr在C++0x之後就標繼承<strong>deprecated</strong>了，不建議使用。
+由於C++0x引進了Rvalue reference，因此新的unique_ptr就此登場。</p>
+
+<h2 id="uniqueptr">unique_ptr</h2>
+<p>unique_ptr能做的事幾乎跟auto_ptr一樣，除了少數例外。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">auto_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">a</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">);</span>
+</span><span class="line"><span class="n">auto_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="c1">// Compile success, but nosafe</span>
+</span><span class="line"><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">);</span>
+</span><span class="line"><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">d</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="c1">// Compile error</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>不過你也可以利用C++0x新增的Move Semantics，手動進行Move動作。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">c</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">);</span>
+</span><span class="line"><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">d</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">c</span><span class="p">));</span> <span class="c1">// OK</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>靠著C++0x新增的<a href="http://thbecker.net/articles/rvalue_references/section_01.html">Rvalue Reference</a>，區分出Copy跟Move的差異。看著unique_ptr的實作，他只允許Move Constructor，而不允許Copy Constructor。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">template</span><span class="o">&lt;</span><span class="n">class</span> <span class="n">_Ty</span><span class="p">,</span> <span class="n">class</span> <span class="n">_Dx</span><span class="o">&gt;</span>	
+</span><span class="line"><span class="n">class</span> <span class="n">unique_ptr</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line"><span class="nl">private:</span>
+</span><span class="line">	<span class="n">unique_ptr</span><span class="p">(</span><span class="k">const</span> <span class="n">_Myt</span><span class="o">&amp;</span><span class="p">);</span>			<span class="c1">// not defined</span>
+</span><span class="line">	<span class="n">unique_ptr</span><span class="o">&amp;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">_Myt</span><span class="o">&amp;</span><span class="p">);</span>	<span class="c1">// not defined</span>
+</span><span class="line"><span class="nl">public:</span>
+</span><span class="line">	<span class="n">unique_ptr</span><span class="p">(</span><span class="n">unique_ptr</span><span class="o">&amp;&amp;</span> <span class="n">_Right</span><span class="p">)</span> 			<span class="n">_NOEXCEPT</span><span class="p">;</span>
+</span><span class="line">	<span class="n">unique_ptr</span><span class="o">&amp;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="n">unique_ptr</span><span class="o">&amp;&amp;</span> <span class="n">_Right</span><span class="p">)</span>	<span class="n">_NOEXCEPT</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>如果要得到更多的Rvalue Refenece的相關內容，請參考這篇<a href="http://blogs.msdn.com/b/vcblog/archive/2009/02/03/rvalue-references-c-0x-features-in-vc10-part-2.aspx">Rvalue References: C++0x Features in VC10, Part 2</a>。</p>
+
+<h2 id="uniqueptr-1">unique_ptr還能做些什麼</h2>
+
+<p>由於C++0x引進了Move Semantics，連帶的STL所有Container跟Algorithmer都支援Move Semantics了，因此這樣的程式碼就變得可行了。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">typedef</span> <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span> <span class="n">UniCharPtr</span><span class="p">;</span>
+</span><span class="line"><span class="n">vector</span><span class="o">&lt;</span><span class="n">UniCharPtr</span><span class="o">&gt;</span> <span class="n">vc</span><span class="p">;</span>
+</span><span class="line"><span class="n">vc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">UniCharPtr</span><span class="p">(</span><span class="n">new</span> <span class="kt">char</span><span class="p">(</span><span class="sc">&#39;c&#39;</span><span class="p">)));</span>
+</span><span class="line"><span class="n">vc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">UniCharPtr</span><span class="p">(</span><span class="n">new</span> <span class="kt">char</span><span class="p">(</span><span class="sc">&#39;b&#39;</span><span class="p">)));</span>
+</span><span class="line"><span class="n">vc</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">UniCharPtr</span><span class="p">(</span><span class="n">new</span> <span class="kt">char</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">)));</span>
+</span><span class="line"><span class="n">sort</span><span class="p">(</span><span class="n">vc</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">vc</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[]</span> <span class="p">(</span><span class="k">const</span> <span class="n">UniCharPtr</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">UniCharPtr</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span> <span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="o">*</span><span class="n">a</span> <span class="o">&lt;</span> <span class="o">*</span><span class="n">b</span><span class="p">;</span>
+</span><span class="line"><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在這裡同樣用上了<a href="http://candrews.net/blog/2011/07/understanding-c-0x-lambda-functions/">lambda expression</a>，留待有空再寫。</p>
+
+<p>有個手法稱作<a href="http://www.gotw.ca/gotw/025.htm">source and sink idiom</a>
+因為有了Move Semantics更容易的實現。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Source</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">);</span> <span class="p">}</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">Sink</span><span class="p">(</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">s</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class="line"><span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="n">Source</span><span class="p">();</span>
+</span><span class="line"><span class="n">Sink</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">source</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>除此之外，還能夠自訂Destructor。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">auto</span> <span class="n">del</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Deleting x, value is : &quot;</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class="line">	<span class="n">delete</span> <span class="n">p</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">decltype</span><span class="p">(</span><span class="n">del</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">px</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">del</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>以及透過<code>partial specialization</code>來管理一個動態產生的Array。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="k">auto</span> <span class="n">del</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">p</span><span class="p">[])</span> <span class="p">{</span> <span class="n">delete</span> <span class="p">[]</span> <span class="n">p</span><span class="p">;</span> <span class="p">};</span>
+</span><span class="line"><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="kt">int</span> <span class="p">[],</span> <span class="n">decltype</span><span class="p">(</span><span class="n">del</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">px</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">del</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1172,70 +1452,6 @@ int main()
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/07/how-to-use-ports-on-freebsd/">How to use ports on FreeBSD</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-07T08:57:00+08:00" pubdate data-updated="true">Dec 7<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/12/07/how-to-use-ports-on-freebsd/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>ports是FreeBSD安裝軟體的主要途徑，在安裝FreeBSD的時候記得選取<strong>Port Collection</strong>。</p>
-
-<p>Portsnap 是 FreeBSD 6.0之後所採用的更新Ports方案，以下是簡單介紹。</p>
-
-<h3 id="portsnap">首次使用 Portsnap</h3>
-<p>首先使用 <strong>portsnap fetch</strong> 抓取Server中的Snapshot，接著使用 <strong>portsnap extract</strong>解開存入/usr/ports中。 兩個指令也可以合併一起使用 <strong>portsnap fetch extract</strong>。</p>
-
-<h3 id="portsnap-1">更新 Portsnap</h3>
-<p>跟上面一樣的方法，先 <strong>portsnap fetch</strong>抓取Snapshot，接著<strong>portsnap update</strong>更新ports資料：也可以<strong>portsnap fetch update</strong>一起使用。</p>
-
-<h3 id="ports-">如何在 ports 裡面找尋軟體</h3>
-<p>在 /usr/ports下，打上 <strong>make search name=”xxx”</strong>*，就可以找到xxx有關的ports。</p>
-
-<h3 id="section">如何安裝軟體</h3>
-<p>在對應的 ports中，打上 <strong>make install</strong> 即可安裝，<strong>make clean</strong> 會將中間產物清除，同樣的可以使用 <strong>make install clean</strong>來完成上面兩件事。</p>
-
-<h3 id="section-1">如何移除已安裝的軟體</h3>
-<p>同樣進入對應的ports，打上 <strong>make deinstall</strong></p>
-
-<h3 id="section-2">如何一次更新所有安裝過的軟體</h3>
-<p>先從ports當中安裝portmaster。更新port colecction，接著打<strong>portmaster -ayD</strong>全部更新，要對portmaster有更進一步了解，請參考底下網頁。</p>
-
-<h3 id="section-3">參考資料</h3>
-<p><a href="http://www.freebsd.org/zh/FAQ/ports.html">1. Ports and Packages 常見問題</a></p>
-
-<p><a href="http://pgx.servu.tw/2012/08/01/portmaster/">2. 系統 Ports 軟體升級工具： portmaster</a></p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1251,6 +1467,10 @@ int main()
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/01/14/setup-ssh-server-in-ubuntu/">如何在ubuntu中設定ssh</a>
       </li>
     
@@ -1264,10 +1484,6 @@ int main()
     
       <li class="post">
         <a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">Add resource files to executable/library for gcc</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a>
       </li>
     
   </ul>

@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Incomplete class types for C++ - 第十三號艦隊</title>
+  <title>Tag: C++0x - 第十三號艦隊</title>
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="先從 C++ Standard看起 The C++ Standard allows, in 5.3.5/5, pointers to incomplete class types to be deleted with a delete-expression. When the class has &hellip;">
+  <meta name="description" content="Tag: C++0x">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/">
+  <link rel="canonical" href="http://HungMingWu.github.comblog/tags/c-0x/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -97,150 +97,36 @@
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">Incomplete class types for C++</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-05T15:32:00+08:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
-        
-         | <a href="#disqus_thread">Comments</a>
-        
-      </p>
+    <h1 class="entry-title">Tag: C++0x</h1>
     
   </header>
-
-
-<div class="entry-content"><p>先從 C++ Standard看起</p>
-
-<blockquote><p>The C++ Standard allows, in 5.3.5/5, pointers to incomplete class types to be deleted with a delete-expression. When the class has a non-trivial destructor, or a class-specific operator delete, the behavior is undefined. Some compilers issue a warning when an incomplete type is deleted, but unfortunately, not all do, and programmers sometimes ignore or disable warnings.</p></blockquote>
-
-<p>當呼叫deleter時，僅會釋放pointer所佔據的空間，由於不知道他的Destructor有沒有其他的行為，因此不會呼叫其Destructor。</p>
-
-<p>以下是一個範例</p>
-
-<div><script src="https://gist.github.com/4213523.js"></script>
-<noscript><pre><code>#include &quot;deleter.h&quot;
-void delete_object(Object* p) 
-{ 
-	delete p; 
-}</code></pre></noscript></div>
-
-<p>在各大編譯器下給出的錯誤訊息
-#### Visual Studio ####</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">warning C4150: deletion of pointer to incomplete type 'Object'; no destructor called</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h4 id="gcc">GCC</h4>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">deleter.cpp: In function 'void delete_object(Object*)':
-</span><span class="line">deleter.cpp:4: warning: possible problem detected in invocation of delete operator:
-</span><span class="line">deleter.cpp:2: warning: 'p' has incomplete type
-</span><span class="line">deleter.h:1: warning: forward declaration of 'struct Object'
-</span><span class="line">deleter.cpp:4: note: neither the destructor nor the class-specific operator delete will be called, even if they are declared when the class is defined.</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h4 id="clang">clang</h4>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">deleter.cpp:4:2: warning: deleting pointer to incomplete type 'Object' may cause
-</span><span class="line">      undefined behaviour
-</span><span class="line">        delete p; 
-</span><span class="line">        ^      ~
-</span><span class="line">./deleter.h:1:7: note: forward declaration of 'Object'
-</span><span class="line">class Object;
-</span><span class="line">      ^
-</span><span class="line">1 warning generated.</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>解決方式也很簡單，在deleter.cpp中加入 <strong>#include “object.h”</strong> 即可。</p>
-
-<p>或是參考 <a href="http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Checked_delete">Check Delete Item</a></p>
-
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">吳小明</span></span>
-
-      
-
-
-
-
-
+  <div id="blog-archives" class="tag">
 
 
 
   
+  <h2>2013</h2>
 
-
-<time datetime="2012-12-05T15:32:00+08:00" pubdate data-updated="true">Dec 5<span>th</span>, 2012</time>
-      
-
-
-      
-
-
-    </p>
-    
-      <div class="sharing">
+<article>
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
+<h1><a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a></h1>
+<time datetime="2013-01-20T20:17:00+08:00" pubdate><span class='month'>Jan</span> <span class='day'>20</span> <span class='year'>2013</span></time>
 
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2012/12/05/introduction-valgrind/" title="Previous Post: Introduction Valgrind">&laquo; Introduction Valgrind</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2012/12/07/how-to-use-ports-on-freebsd/" title="Next Post: How to use ports on FreeBSD">How to use ports on FreeBSD &raquo;</a>
-      
-    </p>
-  </footer>
+<footer>
+  <span class="categories">posted in <a class='category' href='/blog/categories/programming/'>programming</a></span>
+</footer>
+
+
 </article>
 
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-  </section>
+
+  
+</article>
 
 </div>
 
@@ -325,10 +211,7 @@ void delete_object(Object* p)
       var disqus_shortname = 'littlewhite0816';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/';
-        var disqus_url = 'http://HungMingWu.github.com/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
