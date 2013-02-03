@@ -9,8 +9,11 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="ports是FreeBSD安裝軟體的主要途徑，在安裝FreeBSD的時候記得選取Port Collection。 Portsnap 是 FreeBSD 6.0之後所採用的更新Ports方案，以下是簡單介紹。 首次使用 Portsnap
-首先使用 portsnap fetch &hellip;">
+  <meta name="description" content="如果要在Octopress使用數學符號，首先先安裝 kramdown 1
+gem install kramdown 接著修改_config.yml index 1a06ae2..ef440ea 100644
+--- a/_config.yml
++++ b/_config.yml
+@@ -33,7 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -99,6 +102,120 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/07/latex-on-octopress/">在Octopress中使用Latex</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-07T15:18:00+08:00" pubdate data-updated="true">Dec 7<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/07/latex-on-octopress/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>如果要在Octopress使用數學符號，首先先安裝 kramdown</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">gem install kramdown</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>接著修改_config.yml</p>
+
+<div><script src="https://gist.github.com/4231812.js?file=_config.yaml.diff"></script>
+<noscript><pre><code>index 1a06ae2..ef440ea 100644
+--- a/_config.yml
++++ b/_config.yml
+@@ -33,7 +33,7 @@ destination: public
+ plugins: plugins
+ code_dir: downloads/code
+ category_dir: blog/categories
+-markdown: rdiscount
++markdown: kramdown
+ pygments: false # default python pygments have been replaced by pygments.rb
+
+ paginate: 10          # Posts per page on the blog index</code></pre></noscript></div>
+
+<p>將rdiscount改成kramdown</p>
+
+<p>將以下這段代碼塞入 /source/_includes/custom/head.html</p>
+<div><script src="https://gist.github.com/4231812.js?file=head.html"></script>
+<noscript><pre><code>&lt;!-- mathjax config similar to math.stackexchange --&gt;
+
+&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], [&quot;\\(&quot;,&quot;\\)&quot;] ],
+      processEscapes: true
+    }
+  });
+&lt;/script&gt;
+
+&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+&lt;/script&gt;
+
+&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i &lt; all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;
+   src=&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;&gt;
+&lt;/script&gt;
+</code></pre></noscript></div>
+
+<p>解決滑鼠右鍵按下會一片空白的問題</p>
+<div><script src="https://gist.github.com/4231812.js?file=_theme.scss.diff"></script>
+<noscript><pre><code>--- a/sass/base/_theme.scss
++++ b/sass/base/_theme.scss
+@@ -75,7 +75,7 @@ html {
+   background: $page-bg image-url('line-tile.png') top left;
+ }
+ body {
+-  &gt; div {
++  &gt; div#main {
+     background: $sidebar-bg $noise-bg;
+     border-bottom: 1px solid $page-border-bottom;
+     &gt; div {
+</code></pre></noscript></div>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2012/12/07/latex-on-octopress/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -879,6 +996,10 @@ int main(int argc, char *argv[])
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++0x</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a>
       </li>
     
@@ -892,10 +1013,6 @@ int main(int argc, char *argv[])
     
       <li class="post">
         <a href="/blog/2013/01/10/ar-ranlib-ld-issue/">ar, ranlib, ld issue</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">Add resource files to executable/library for gcc</a>
       </li>
     
   </ul>
