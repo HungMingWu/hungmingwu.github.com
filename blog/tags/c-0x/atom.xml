@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: C++0x | 第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/blog/tags/c-0x/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-02-03T22:23:24+08:00</updated>
+  <updated>2013-03-13T22:53:39+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -12,219 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[Lambda Expression in C++0x]]></title>
-    <link href="http://HungMingWu.github.com/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/"/>
-    <updated>2013-01-28T22:58:00+08:00</updated>
-    <id>http://HungMingWu.github.com/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x</id>
-    <content type="html"><![CDATA[<p>C++0x引進了<code>Lambda Expression</code>，這功能其實也不新鮮了，在其他語言都有類似的觀念。
-為了處理Callback function，做了很多的改進
-同樣的，我們從C語言時期看起。</p>
-
-<h2 id="c">C時期</h2>
-<p>C語言只有一種方式處理callback function，<strong>function pointer</strong>。
-像這個樣子
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">int</span> <span class="nf">add2</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="kt">int</span> <span class="nf">operate</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">,</span> <span class="n">op2</span> <span class="n">func</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="n">operate</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">add2</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-Function Pointer的方式處理Callback function非常經典，幾乎可以在所有純C語言開發的程式碼看到他。不過還是有可以改進的地方，例如</p>
-
-<ul>
-  <li>速度: 由於傳進來的是指標，只能間接呼叫，無法有足夠的資訊做最佳化。</li>
-  <li>狀態: Function比較難保存運行中的特定狀態。</li>
-</ul>
-
-<h2 id="c98">C++98時期</h2>
-<p>C++的Functor(仿凾式)就是因此而生的，透過<code>overload operator()</code>，來改進上述所無法缺憾。搭配template的使用，使其應用更具彈性。可以同時支援Callback function跟Functor兩種形式。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">struct</span> <span class="n">Add2</span> <span class="p">{</span>
-</span><span class='line'>	<span class="kt">int</span> <span class="n">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span>
-</span><span class='line'>	<span class="p">{</span>
-</span><span class='line'>		<span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span>
-</span><span class='line'>	<span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="kt">int</span> <span class="nf">sub2</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="n">template</span> <span class="o">&lt;</span><span class="kr">typename</span> <span class="n">t</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="o">&gt;</span>
-</span><span class='line'><span class="kt">int</span> <span class="n">operate</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="kt">int</span> <span class="n">b</span><span class="p">,</span> <span class="n">T</span> <span class="n">callback</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>	<span class="k">return</span> <span class="n">callback</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="n">operate</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Add2</span><span class="p">());</span>
-</span><span class='line'><span class="n">operate</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sub2</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></typename></p>
-
-<p>之後有人想要將class member method跟static class method也包裝成Functor的形式，有<code>Loki</code>跟<code>Boost</code>兩大主流為主。這裡就不多談了，在C++0x中也將boost的bind跟function列入TR1裡，可以很方便的產生Functor。</p>
-
-<h2 id="c0x">C++0x時期</h2>
-<p>Functor雖好，不過每要新增一個新功能，就要寫一個function object，如果是只被使用一次的functor，維護這段程式碼需要付出成本，
-因此就產生了一個暱名函數(anonymous function)，像這樣。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">for_each</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>	<span class="n">cout</span> <span class="err">« </span><span class="n">n</span><span class="p">;</span>
-</span><span class='line'>	<span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>		<span class="n">cout</span> <span class="err">« ”</span> <span class="n">even</span> <span class="err">“</span><span class="p">;</span>
-</span><span class='line'>	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>		<span class="n">cout</span> <span class="err">« ”</span> <span class="n">odd</span> <span class="err">“</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-詳細的語言規範可以參考<a href="http://msdn.microsoft.com/en-us/library/dd293603%28v=VS.100%29.aspx">MSDN的資料</a>。透過跟程式碼上下文互動，達到非常有趣的效果。</p>
-
-<h2 id="lambda-trick">Lambda Trick</h2>
-<p>之前我們介紹過unique_ptr，用來管理動態記憶體，非memory的Resource該怎麼處理，此時就是ScopeGuard登場的時候
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">class</span> <span class="n">ScopeGuard</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'><span class="nl">public:</span>
-</span><span class='line'>    <span class="n">explicit</span> <span class="n">ScopeGuard</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">void</span><span class="p">()</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">onExitScope</span><span class="p">)</span>
-</span><span class='line'>        <span class="o">:</span> <span class="n">onExitScope</span><span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="p">(</span><span class="n">onExitScope</span><span class="p">),</span> <span class="n">dismissed</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="p">(</span><span class="nb">false</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span> <span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;~</span><span class="n">ScopeGuard</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">dismissed_</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>        <span class="n">onExitScope_</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">void</span> <span class="n">Dismiss</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="n">dismissed_</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">private</span><span class="o">:</span>
-</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">void</span><span class="p">()</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">onExitScope</span><span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="p">;</span>
-</span><span class='line'>    <span class="n">bool</span> <span class="n">dismissed</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="p">;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">private</span><span class="o">:</span> <span class="c1">// noncopyable</span>
-</span><span class='line'>    <span class="n">ScopeGuard</span><span class="p">(</span><span class="n">ScopeGuard</span> <span class="k">const</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;);</span>
-</span><span class='line'>    <span class="n">ScopeGuard</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">operator</span><span class="o">=</span><span class="p">(</span><span class="n">ScopeGuard</span> <span class="k">const</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;);</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>	<span class="n">HANDLE</span> <span class="n">h</span> <span class="o">=</span> <span class="n">CreateFile</span><span class="p">(</span><span class="err">…</span><span class="p">);</span>
-</span><span class='line'>	<span class="n">ScopeGuard</span> <span class="n">onExit</span><span class="p">([</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;]</span> <span class="p">{</span> <span class="n">CloseHandle</span><span class="p">(</span><span class="n">h</span><span class="p">);</span> <span class="p">});</span>
-</span><span class='line'>	<span class="c1">// do smoething </span>
-</span><span class='line'>	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-或者將不同function signature，由於要經過相同的處理流程，於是用lambda expression隱藏了細節，以下是<a href="http://directxtk.codeplex.com/">DirectX ToolKit</a>的部分程式碼。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">template</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kr">typename</span> <span class="n">T</span><span class="p">,</span> <span class="kr">typename</span> <span class="n">TCreateFunc</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span>
-</span><span class='line'><span class="k">static</span> <span class="n">T</span><span class="o">*</span> <span class="n">DemandCreate</span><span class="p">(</span><span class="n">Microsoft</span><span class="o">::</span><span class="n">WRL</span><span class="o">::</span><span class="n">ComPtr</span><span class="o">&lt;</span><span class="n">t</span><span class="o">&gt;&amp;</span><span class="n">amp</span><span class="p">;</span> <span class="n">comPtr</span><span class="p">,</span> <span class="n">TCreateFunc</span> <span class="n">createFunc</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>	<span class="n">T</span><span class="o">*</span> <span class="n">result</span> <span class="o">=</span> <span class="n">comPtr</span><span class="p">.</span><span class="n">Get</span><span class="p">();</span><span class="o">&lt;/</span><span class="n">t</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="c1">// Create the new object.</span>
-</span><span class='line'>    <span class="n">ThrowIfFailed</span><span class="p">(</span>
-</span><span class='line'>    	<span class="n">createFunc</span><span class="p">(</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">result</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">);</span>
-</span><span class='line'>    <span class="n">comPtr</span><span class="p">.</span><span class="n">Attach</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="k">return</span> <span class="n">result</span><span class="p">;</span> <span class="p">}</span> <span class="n">ID3D11SamplerState</span><span class="o">*</span> <span class="n">CommonStates</span><span class="o">::</span><span class="n">LinearClamp</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
-</span><span class='line'><span class="k">return</span> <span class="n">DemandCreate</span><span class="p">(</span><span class="n">pImpl</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">linearClamp</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;](</span><span class="n">ID3D11SamplerState</span><span class="o">**</span> <span class="n">pResult</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">pImpl</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">CreateSamplerState</span><span class="p">(</span><span class="n">D3D11_FILTER_MIN_MAG_MIP_LINEAR</span><span class="p">,</span> <span class="n">D3D11_TEXTURE_ADDRESS_CLAMP</span><span class="p">,</span> <span class="n">pResult</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span> <span class="p">}</span> <span class="n">ID3D11DepthStencilState</span><span class="o">*</span> <span class="n">CommonStates</span><span class="o">::</span><span class="n">DepthRead</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
-</span><span class='line'><span class="k">return</span> <span class="n">DemandCreate</span><span class="p">(</span><span class="n">pImpl</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">depthRead</span><span class="p">,</span> <span class="p">[</span><span class="o">&amp;</span><span class="n">amp</span><span class="p">;](</span><span class="n">ID3D11DepthStencilState</span><span class="o">**</span> <span class="n">pResult</span><span class="p">)</span>
-</span><span class='line'><span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">pImpl</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">CreateDepthStencilState</span><span class="p">(</span><span class="nb">true</span><span class="p">,</span> <span class="nb">false</span><span class="p">,</span> <span class="n">pResult</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div> 可以看得出來，DemandCreate處理的流程相同，但是船進去的type跟Callback function不同，就能達到一般化的效果，這也是我目前看到最有趣的例子。
-</code></pre>
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[From auto_ptr to unique_ptr]]></title>
@@ -442,6 +229,136 @@ auto_ptr的問題是沒有**Copy Semantics**，他的Copy Constructur裡面做�
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">auto</span> <span class="n">del</span> <span class="o">=</span> <span class="p">[](</span><span class="kt">int</span> <span class="n">p</span><span class="p">[])</span> <span class="p">{</span> <span class="n">delete</span> <span class="p">[]</span> <span class="n">p</span><span class="p">;</span> <span class="p">};</span>
 </span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="kt">int</span> <span class="p">[],</span> <span class="n">decltype</span><span class="p">(</span><span class="n">del</span><span class="p">)</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="n">px</span><span class="p">(</span><span class="n">new</span> <span class="kt">int</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">del</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[如何從一個Singly linked linear list中刪除資料]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/"/>
+    <updated>2013-01-14T22:08:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list</id>
+    <content type="html"><![CDATA[<p>要從一個<strong>singly lisked linerar list</strong>中刪除文件，最簡單的方式莫過於用一個指標指向前一個node，如果現在的item需要刪除，將前面一項item指向後面的item即可。</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">node</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">node</span> <span class="o">*</span> <span class="n">next</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span> <span class="n">node</span><span class="p">;</span>  <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">node</span> <span class="o">*</span><span class="n">remove_if</span><span class="p">(</span><span class="n">node</span> <span class="o">*</span> <span class="n">head</span><span class="p">,</span> <span class="n">remove_fn</span> <span class="n">rm</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>     <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">node</span> <span class="o">*</span><span class="n">prev</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span> <span class="n">curr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="p">)</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="p">{</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="n">node</span> <span class="o">*</span> <span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">rm</span><span class="p">(</span><span class="n">curr</span><span class="p">))</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="p">{</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="p">(</span><span class="n">prev</span><span class="p">)</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                            <span class="n">prev</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="k">else</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                            <span class="n">head</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="n">free</span><span class="p">(</span><span class="n">curr</span><span class="p">);</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="p">}</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="k">else</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>                    <span class="n">prev</span> <span class="o">=</span> <span class="n">curr</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="p">}</span> <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">head</span><span class="p">;</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>有人提出了更精巧的方法，利用<strong>two star pointer</strong>來達成，也就是指標的指標。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">void</span> <span class="nf">remove_if</span><span class="p">(</span><span class="n">node</span> <span class="o">&lt;</span><span class="n">strong</span><span class="o">&gt;</span><span class="n">head</span><span class="p">,</span> <span class="n">remove_fn</span> <span class="n">rm</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="n">node</span><span class="o">&lt;/</span><span class="n">strong</span><span class="o">&gt;</span> <span class="n">curr</span> <span class="o">=</span> <span class="n">head</span><span class="p">;</span> <span class="o">*</span><span class="n">curr</span><span class="p">;</span> <span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>            <span class="n">node</span> <span class="o">*</span> <span class="n">entry</span> <span class="o">=</span> <span class="o">*</span><span class="n">curr</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="n">rm</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                    <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">entry</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span>
+</span><span class='line'>                    <span class="n">free</span><span class="p">(</span><span class="n">entry</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                    <span class="n">curr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">amp</span><span class="p">;</span><span class="n">entry</span><span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span><span class="n">next</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>在C++11的年代，增加了<code>forward_list</code>，省得自己造輪子的麻煩。
+以下是forward_list的介紹。
+<blockquote><p>std::forward_list is a container that supports fast insertion and removal of elements from anywhere in the container. Fast random access is not supported. It is implemented as singly-linked list and essentially does not have any overhead compared to its implementation in C. Compared to std::list this container provides more space efficient storage when bidirectional iteration is not needed.</p></blockquote></p>
+
+<p>以下是一個示範程式，裡面同時使用了<a href="http://candrews.net/blog/2011/07/understanding-c-0x-lambda-functions/">lambda expression</a>跟<a href="http://oopscenities.net/2011/06/09/c0x-range-based-for-loop/">Range-based for loop</a>，日後有時間在寫。</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;forward_list&gt;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">forward_list</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="p">{</span><span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">};</span>
+</span><span class='line'>    <span class="n">list</span><span class="p">.</span><span class="n">remove_if</span><span class="p">([](</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span> <span class="p">});</span> <span class="o">&lt;/</span><span class="kt">int</span><span class="o">&gt;&lt;/</span><span class="n">forward_list</span><span class="o">&gt;&lt;/</span><span class="n">iostream</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span> <span class="o">:</span> <span class="n">list</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">n</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="sc">&#39; &#39;</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>

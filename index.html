@@ -9,10 +9,8 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="C++0x引進了Lambda Expression，這功能其實也不新鮮了，在其他語言都有類似的觀念。
-為了處理Callback function，做了很多的改進
-同樣的，我們從C語言時期看起。 C時期
-C語言只有一種方式處理callback function，function pointer。 &hellip;">
+  <meta name="description" content="這篇文章主要是Rvalue References: C++0x Features in VC10, Part 2的閱讀筆記，在原文撰寫過程當中，規格有所變動，因此根據最新的規則做補充說明。 Copy Problems
+C++98/03的時候，最令人詬病的問題，就是建立太多臨時物件，Value &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -107,7 +105,370 @@ C語言只有一種方式處理callback function，function pointer。 &hellip;"
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++0x</a></h1>
+      <h1 class="entry-title"><a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-02-18T20:50:00+08:00" pubdate data-updated="true">Feb 18<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/02/18/rvalue-reference/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>這篇文章主要是<a href="http://blogs.msdn.com/b/vcblog/archive/2009/02/03/rvalue-references-c-0x-features-in-vc10-part-2.aspx">Rvalue References: C++0x Features in VC10, Part 2</a>的閱讀筆記，在原文撰寫過程當中，規格有所變動，因此根據最新的規則做補充說明。</p>
+
+<h2 id="copy-problems">Copy Problems</h2>
+<p>C++98/03的時候，最令人詬病的問題，就是建立太多臨時物件，Value Semantics的意思就是複製出來的物件跟原先是獨立的，不會互相干擾</p>
+
+<h2 id="lvalue-and-rvalue">Lvalue and Rvalue</h2>
+<p>在C++98/03時期，有這麼一條規則<code>Every C++ expression is either an lvalue or an rvalue.</code>，Lvalue是在運算過後留下來的續存物件，而Rvalue是運算過後生命期就結束的臨時物件。
+殂此之外，C++98/03裡還有一條規則<code>A function call is an lvalue if and only if the result type is a reference</code></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="n">string</span> <span class="n">one</span><span class="p">(</span><span class="s">&quot;one&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">const</span> <span class="n">string</span> <span class="n">two</span><span class="p">(</span><span class="s">&quot;two&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="n">string</span> <span class="n">three</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;three&quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line"><span class="k">const</span> <span class="n">string</span> <span class="n">four</span><span class="p">()</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;four&quot;</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="n">one</span><span class="p">;</span>     <span class="c1">// modifiable lvalue</span>
+</span><span class="line"><span class="n">two</span><span class="p">;</span>     <span class="c1">// const lvalue</span>
+</span><span class="line"><span class="n">three</span><span class="p">();</span> <span class="c1">// modifiable rvalue</span>
+</span><span class="line"><span class="n">four</span><span class="p">();</span>  <span class="c1">// const rvalue</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ul>
+  <li>Type&amp;可以繫結到一個modifiable lvalue，而如果要繫結到modifiable rvalue，C++規定禁止(Visual C++除外，可以把警告層級從3調到4，會警告你這樣很危險，而gcc跟clang則是輸出錯誤訊息。)</li>
+  <li>const Type&amp;可以繫結到任何一種型態，不過不能對Rvalue做任何修改，因此不能對即將消滅的臨時物件採取任何行動</li>
+</ul>
+
+<p>而在C++11之後，引進了<code>Rvalue reference</code>，解決了這個問題。</p>
+
+<ul>
+  <li>Type&amp;&amp;可以繫結到一個modifiable rvalue，而不能繫結到modifiable lvalue，需要強制轉型。</li>
+  <li>const Type&amp;&amp;可以繫結任何形態</li>
+</ul>
+
+<p>每個reference都有一個名字，所以Bind到Rvalue的refernce，他是一個<strong>Lvalue</strong>，因此以下的程式碼。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;print(const string&amp;)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">string</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="p">{</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;print(string&amp;&amp;)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">RvalueTest</span><span class="p">(</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span> <span class="p">{</span> <span class="n">print</span><span class="p">(</span><span class="n">str</span><span class="p">);</span> <span class="p">}</span>
+</span><span class="line"><span class="n">RvalueTest</span><span class="p">(</span><span class="n">string</span><span class="p">());</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在RValueTest執行結束之前，str是個合法的物件，因此被當作Lvalue，會執行第一個print。</p>
+
+<p>為了學習Rvalue的觀念，自行打造move跟forward函數。</p>
+
+<p>先看C++11之後引進的Reference Collapsing Rules</p>
+
+<ul>
+  <li>T&amp; + &amp; =&gt; T&amp;</li>
+  <li>T&amp;&amp; + &amp; =&gt; T&amp;</li>
+  <li>T&amp; + &amp;&amp; =&gt; T&amp;</li>
+  <li>T&amp;&amp; + T&amp;&amp; =&gt; T&amp;&amp;</li>
+</ul>
+
+<p>而Move的用途就是明確指出不管物件是Lvalue或Rvalue，一律轉成Rvalue就是了。
+而Forward的用途把外面的參數跟語意原封不動的傳進去內部，是Lvalue就是Lvalue，而Rvalue就是Rvalue。
+先從比較簡單的Move開始看起，我門打造的第一版Move大概像這樣。
+由於Move是個template function，必須進行Template Argument Deduction，此時引進了一條新的規則。
+如果傳進來的是Lvalue的話，將會推導成T&amp;，反之如果是Rvalue的話，就會推導成T(根據Reference Collapsing Rules，T和T&amp;&amp;都符合要求，為了解決歧異性，這邊強制要求推導成T)</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">Move</span><span class="p">(....</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這邊先來決定如何傳遞參數，<strong>Call by value</strong>第一個被否決，接著就是<code>T&amp;</code>跟<code>T&amp;&amp;</code>的選擇，根據前面的Reference Collapsing Rules，如果是<code>T&amp;</code>的話一律會摺疊成<code>T&amp;</code>，而T&amp;無法繫結至modifiable rvalue，而如果是<code>T&amp;&amp;</code>的話，不管Lvalue跟Rvalue都可以順利繫結。</p>
+
+<p>接著我們來測試第一版的程式碼</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="n">quark</span><span class="p">(</span><span class="n">Move</span><span class="p">(</span><span class="n">up</span><span class="p">));</span>
+</span><span class="line"><span class="n">quark</span><span class="p">(</span><span class="n">Move</span><span class="p">(</span><span class="n">down</span><span class="p">));</span>
+</span><span class="line"><span class="n">quark</span><span class="p">(</span><span class="n">Move</span><span class="p">(</span><span class="n">strange</span><span class="p">()));</span>
+</span><span class="line"><span class="n">quark</span><span class="p">(</span><span class="n">Move</span><span class="p">(</span><span class="n">charm</span><span class="p">()));</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>印出的結果是</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="nl">t:</span> <span class="n">up</span>
+</span><span class="line"><span class="nl">T:</span> <span class="n">string</span><span class="o">&amp;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;:</span> <span class="n">string</span><span class="o">&amp;</span>
+</span><span class="line">
+</span><span class="line"><span class="nl">t:</span> <span class="n">down</span>
+</span><span class="line"><span class="nl">T:</span> <span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;:</span> <span class="k">const</span> <span class="n">string</span><span class="o">&amp;</span>
+</span><span class="line">
+</span><span class="line"><span class="nl">t:</span> <span class="n">strange</span><span class="p">()</span>
+</span><span class="line"><span class="nl">T:</span> <span class="n">string</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;:</span> <span class="n">string</span><span class="o">&amp;&amp;</span>
+</span><span class="line">
+</span><span class="line"><span class="nl">t:</span> <span class="n">charm</span><span class="p">()</span>
+</span><span class="line"><span class="nl">T:</span> <span class="k">const</span> <span class="n">string</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;:</span> <span class="k">const</span> <span class="n">string</span><span class="o">&amp;&amp;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>顯然結果錯了，原因在於實際參數是Lvalue的話，T會被推導成U&amp;，而T&amp;&amp;的結果依然是U&amp;，變成Move傳回去的語意是個Lvalue，因此導致上面的結果。
+所以我們要做的，就是把U&amp;或U&amp;&amp;一律轉成U&amp;&amp;，也就是std::remove_refernce存在的理由。改寫我們的程式，先用RemoveRefenece取得Primitive Type, 然後加上&amp;&amp;之後就可以得到正確的值。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">RemoveReference</span> <span class="p">{</span>
+</span><span class="line">	<span class="k">typedef</span> <span class="n">T</span> <span class="n">type</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">RemoveReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&gt;</span> <span class="p">{</span>
+</span><span class="line">	<span class="k">typedef</span> <span class="n">T</span> <span class="n">type</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">RemoveReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span> <span class="p">{</span>
+</span><span class="line">	<span class="k">typedef</span> <span class="n">T</span> <span class="n">type</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">typename</span> <span class="n">RemoveReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;&amp;</span> <span class="n">Move</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">t</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">RemoveReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>gcc的實作就類似於這樣。
+接著來討論forward該怎麼做，從上面我們可以知道，我們只能用T&amp;&amp;來傳遞參數。
+先來一組helper function來驗證程式的正確性。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="kt">void</span> <span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;inner(std::string &amp;str)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">inner</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;inner(const std::string &amp;str)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">inner</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;inner(const std::string&amp;&amp; str)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;inner(std::string&amp;&amp; str)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="n">inner</span><span class="p">(</span><span class="n">Forward</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="n">outer</span><span class="p">(</span><span class="n">up</span><span class="p">);</span>
+</span><span class="line"><span class="n">outer</span><span class="p">(</span><span class="n">down</span><span class="p">);</span>
+</span><span class="line"><span class="n">outer</span><span class="p">(</span><span class="n">strange</span><span class="p">());</span>
+</span><span class="line"><span class="n">outer</span><span class="p">(</span><span class="n">charm</span><span class="p">());</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而我們第一版的Forward的實作</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">Forward</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>輸出結果則是</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="n">inner</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="n">inner</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>從上面知道，value是個左值，所以Type是U&amp;，T被推導成U，T&amp;&amp;被強制轉換成右值，所以輸出的結果如上。避免的方法就是強迫加上template參數。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="n">inner</span><span class="p">(</span><span class="n">Forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">));</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>重新執行程式，這下結果符合我們的需求了</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="n">inner</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span><span class="line"><span class="n">inner</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;&amp;</span> <span class="n">str</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這邊還有幾點要說明的
+之前的範例，value是左值，而T可能是U&amp;或是U，T&amp;的結果是U&amp;，可以繫結住左值沒有問題。萬一Forward的參數是個右值怎麼辦？</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="n">inner</span><span class="p">(</span><span class="n">Forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">string</span><span class="p">()));</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>我們需要另外一個function，解決function resolution的問題。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">Forward</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在傳進來的是個右值時，T被推導成U。T&amp;&amp;正好可以綁定一個Rvalue，解決上面的問題。不過問題又來了，如果是左值的話，T是U&amp;，T&amp;是U&amp;，T&amp;&amp;還是U&amp;，變成兩個function擁有兩個一模一樣的參數型態，Compiler不知道該選哪個。
+解決方案就是套用上面Move所引進的RemoveReference，還原成Primitive Type。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">Forward</span><span class="p">(</span><span class="k">typename</span> <span class="n">RemoveReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="n">T</span><span class="o">&amp;&amp;</span> <span class="n">Forward</span><span class="p">(</span><span class="k">typename</span> <span class="n">RemoveReference</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&amp;&amp;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&amp;&amp;&gt;</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這樣子有另外一個好處，這個方案禁止了型別推導，不會再有<code>Forward(value)</code>的存在，編譯時期就能指出錯誤。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++11</a></h1>
     
     
       <p class="meta">
@@ -1309,7 +1670,7 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
   </header>
 
 
-  <div class="entry-content"><p>Linux 3.7 kernel出了，順便記憶一編譯核心過程</p>
+  <div class="entry-content"><p>Linux 3.7 kernel出了，順便記憶編譯核心過程</p>
 
 <p>到  <a href="http://www.kernel.org/">The Linux Kernel Archives</a> 抓取想要的核心版本，這裡我們拿3.7當範例，下載完並解開。</p>
 
@@ -1354,242 +1715,6 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/18/introduction-to-llvm/">Introduction to LLVM</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-18T10:18:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/12/18/introduction-to-llvm/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="what-is-llvm">What is LLVM?</h2>
-<p>LLVM的全名是<strong>Low Level Virtual Machine</strong>，和一般所知的Virtual Machine(VMWare, VirtualBox等)不同，他是一種編譯器架構。主要分成</p>
-
-<ul>
-  <li>前端： Source Code -&gt; BitCode</li>
-  <li>後端： BitCode -&gt; Native Code</li>
-</ul>
-
-<p>由於BitCode的獨立性，可以很容易的跨平台。</p>
-
-<p>而LLVM主要有以下幾個特性：</p>
-
-<ol>
-  <li>RISC Like的指令集</li>
-  <li>以SSA(Static Single-Assignment) 形式提供數目不設限的虛擬暫存器</li>
-  <li>以Load/store 指令存取型態定義的指標(Typed-Pointer)</li>
-  <li>基於SSA可明確資料在運作過程中的傳遞流程</li>
-  <li>提供跟語言無關的形態資訊</li>
-  <li>在exception的支援上提供 setjmp/longjmp實作的Exception機制,並提供 invoke指令可呼叫一個需要帶有Exception Handler的函式,與提供Unwind指令,能透過Stack Frame回推到上一個invoke指令位置.</li>
-</ol>
-
-<h2 id="llvm">如何使用LLVM</h2>
-<p>在這裡我們使用<code>Clang</code>來當FrontEnd，將C語言轉換成BitCode。</p>
-
-<p>依舊從Hello World開始</p>
-
-<div><script src="https://gist.github.com/4324690.js?file=hello.c"></script>
-<noscript><pre><code>#include &lt;stdio.h&gt;
-int main()
-{
-        printf(&quot;Hello World!\n&quot;);
-        return 0;
-}</code></pre></noscript></div>
-
-<p>接著我們編譯此檔案</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">clang</span> -S -emit-llvm hello.c
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>此時目錄下生成了hello.s，觀看其內容</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">; ModuleID = 'hello.c'
-</span><span class="line">target datalayout = "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
-</span><span class="line">target triple = "x86_64-unknown-freebsd9.0"
-</span><span class="line">
-</span><span class="line">@.str = private unnamed_addr constant [14 x i8] c"Hello World!\0A\00", align 1
-</span><span class="line">
-</span><span class="line">define i32 @main() nounwind uwtable {
-</span><span class="line">entry:
-</span><span class="line">  %retval = alloca i32, align 4
-</span><span class="line">  store i32 0, i32* %retval
-</span><span class="line">  %call = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([14 x i8]* @.str, i32 0, i32 0))
-</span><span class="line">  ret i32 0
-</span><span class="line">}
-</span><span class="line">
-</span><span class="line">declare i32 @printf(i8*, ...)</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>注意，在這邊我們有加上 <code>-emit-llvm</code>的選項，表示我們要使用LLVM的對應組件，如果沒加這命令的話，其作用跟一般的Native Complier相同，如下。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">clang</span> -S hello.c
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>一樣產生hello.s，但是內容完全不同</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-<span class="line-number">17</span>
-<span class="line-number">18</span>
-<span class="line-number">19</span>
-<span class="line-number">20</span>
-<span class="line-number">21</span>
-<span class="line-number">22</span>
-<span class="line-number">23</span>
-<span class="line-number">24</span>
-<span class="line-number">25</span>
-<span class="line-number">26</span>
-<span class="line-number">27</span>
-<span class="line-number">28</span>
-<span class="line-number">29</span>
-<span class="line-number">30</span>
-<span class="line-number">31</span>
-<span class="line-number">32</span>
-<span class="line-number">33</span>
-<span class="line-number">34</span>
-<span class="line-number">35</span>
-<span class="line-number">36</span>
-<span class="line-number">37</span>
-<span class="line-number">38</span>
-<span class="line-number">39</span>
-<span class="line-number">40</span>
-<span class="line-number">41</span>
-<span class="line-number">42</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">.file   "hello.c"
-</span><span class="line">        .text
-</span><span class="line">        .globl  main
-</span><span class="line">        .align  16, 0x90
-</span><span class="line">        .type   main,@function
-</span><span class="line">main:                                   # @main
-</span><span class="line">.Ltmp2:
-</span><span class="line">        .cfi_startproc
-</span><span class="line"># BB#0:                                 # %entry
-</span><span class="line">        pushq   %rbp
-</span><span class="line">.Ltmp3:
-</span><span class="line">        .cfi_def_cfa_offset 16
-</span><span class="line">.Ltmp4:
-</span><span class="line">        .cfi_offset %rbp, -16
-</span><span class="line">        movq    %rsp, %rbp
-</span><span class="line">.Ltmp5:
-</span><span class="line">        .cfi_def_cfa_register %rbp
-</span><span class="line">        subq    $16, %rsp
-</span><span class="line">        leaq    .L.str, %rdi
-</span><span class="line">        movl    $0, -4(%rbp)
-</span><span class="line">        movb    $0, %al
-</span><span class="line">        callq   printf
-</span><span class="line">        movl    $0, %ecx
-</span><span class="line">        movl    %eax, -8(%rbp)          # 4-byte Spill
-</span><span class="line">        movl    %ecx, %eax
-</span><span class="line">        addq    $16, %rsp
-</span><span class="line">        popq    %rbp
-</span><span class="line">        ret
-</span><span class="line">.Ltmp6:
-</span><span class="line">        .size   main, .Ltmp6-main
-</span><span class="line">.Ltmp7:
-</span><span class="line">        .cfi_endproc
-</span><span class="line">.Leh_func_end0:
-</span><span class="line">
-</span><span class="line">        .type   .L.str,@object          # @.str
-</span><span class="line">        .section        .rodata.str1.1,"aMS",@progbits,1
-</span><span class="line">.L.str:
-</span><span class="line">        .asciz   "Hello World!\n"
-</span><span class="line">        .size   .L.str, 14
-</span><span class="line">
-</span><span class="line">
-</span><span class="line">        .section        ".note.GNU-stack","",@progbits</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="bitcode">如何產生 BitCode</h3>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">clang</span> -emit-llvm hello.c -c -o hello.bc
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="llvmjitbitcode">如何用 LLVM的JIT執行BitCode</h3>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">lli</span> hello.bc
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="bitcodeassembly-code">如何看BitCode的Assembly Code</h3>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">llvm</span>-dis &lt; hello.bc | less
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="bitcode-native-assembly-code">如何用BitCode產生 Native Assembly Code</h3>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">llc</span> hello.bc -o hello.s
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<h3 id="bitcodenative-machine-code">如何用BitCode產生Native Machine Code</h3>
-<p>可以直接從BitCode下手，或是從上一步驟產生出來的Assembly Code下手</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">clang</span> hello.bc -o hello_native
-</span><span class="line"><span class="nv">$ </span><span class="nb">clang</span> hello.s -o hello_native
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1605,7 +1730,11 @@ int main()
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++0x</a>
+        <a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++11</a>
       </li>
     
       <li class="post">
@@ -1618,10 +1747,6 @@ int main()
     
       <li class="post">
         <a href="/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/">如何從一個Singly linked linear list中刪除資料</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/10/ar-ranlib-ld-issue/">ar, ranlib, ld issue</a>
       </li>
     
   </ul>
