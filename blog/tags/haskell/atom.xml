@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Programming | 第十三號艦隊]]></title>
-  <link href="http://HungMingWu.github.com/blog/categories/programming/atom.xml" rel="self"/>
+  <title><![CDATA[Tag: Haskell | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/tags/haskell/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
   <updated>2013-05-24T22:49:44+08:00</updated>
   <id>http://HungMingWu.github.com/</id>

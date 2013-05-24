@@ -5,12 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>How to use ports on FreeBSD - 第十三號艦隊</title>
+  <title>Haskell beginner tutorial - 第十三號艦隊</title>
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="ports是FreeBSD安裝軟體的主要途徑，在安裝FreeBSD的時候記得選取Port Collection。 Portsnap 是 FreeBSD 6.0之後所採用的更新Ports方案，以下是簡單介紹。 首次使用 Portsnap
-首先使用 portsnap fetch &hellip;">
+  <meta name="description" content="前一陣子都在忙C++ Grandmaster的比賽，沒什麼時間紀錄一些東西，最近對Functional Programming感到興趣，找Haskell當作的入門的開始。做些紀錄。 安裝
+以Ubuntu為例，先安裝Haskell。 1
+$ apt-get install ghc &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd/">
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -102,7 +103,7 @@
   
   <header>
     
-      <h1 class="entry-title">How to use ports on FreeBSD</h1>
+      <h1 class="entry-title">Haskell beginner tutorial</h1>
     
     
       <p class="meta">
@@ -118,7 +119,7 @@
   
 
 
-<time datetime="2012-12-07T08:57:00+08:00" pubdate data-updated="true">Dec 7<span>th</span>, 2012</time>
+<time datetime="2013-05-24T22:04:00+08:00" pubdate data-updated="true">May 24<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -127,32 +128,82 @@
   </header>
 
 
-<div class="entry-content"><p>ports是FreeBSD安裝軟體的主要途徑，在安裝FreeBSD的時候記得選取<strong>Port Collection</strong>。</p>
+<div class="entry-content"><p>前一陣子都在忙C++ Grandmaster的比賽，沒什麼時間紀錄一些東西，最近對Functional Programming感到興趣，找Haskell當作的入門的開始。做些紀錄。</p>
 
-<p>Portsnap 是 FreeBSD 6.0之後所採用的更新Ports方案，以下是簡單介紹。</p>
+<h2 id="section">安裝</h2>
+<p>以Ubuntu為例，先安裝Haskell。</p>
 
-<h3 id="portsnap">首次使用 Portsnap</h3>
-<p>首先使用 <strong>portsnap fetch</strong> 抓取Server中的Snapshot，接著使用 <strong>portsnap extract</strong>解開存入/usr/ports中。 兩個指令也可以合併一起使用 <strong>portsnap fetch extract</strong>。</p>
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">apt</span>-get install ghc
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<h3 id="portsnap-1">更新 Portsnap</h3>
-<p>跟上面一樣的方法，先 <strong>portsnap fetch</strong>抓取Snapshot，接著<strong>portsnap update</strong>更新ports資料：也可以<strong>portsnap fetch update</strong>一起使用。</p>
+<p>接著就能用<code>ghci</code>進入直譯器了，用<code>Ctrl+D</code>退出ghci。</p>
 
-<h3 id="ports-">如何在 ports 裡面找尋軟體</h3>
-<p>在 /usr/ports下，打上 <strong>make search name=”xxx”</strong>*，就可以找到xxx有關的ports。</p>
+<h2 id="script-programming">Script Programming</h2>
+<p>有兩種方式可以達成</p>
 
-<h3 id="section">如何安裝軟體</h3>
-<p>在對應的 ports中，打上 <strong>make install</strong> 即可安裝，<strong>make clean</strong> 會將中間產物清除，同樣的可以使用 <strong>make install clean</strong>來完成上面兩件事。</p>
+<h3 id="ghci">在ghci當中載入</h3>
+<p>首先我們先來寫一個<code>test.hs</code>文件</p>
 
-<h3 id="section-1">如何移除已安裝的軟體</h3>
-<p>同樣進入對應的ports，打上 <strong>make deinstall</strong></p>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cat &gt; test.hs &lt;&lt; EOF
+</span><span class="line">add x y = x + y
+</span><span class="line">EOF</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<h3 id="section-2">如何一次更新所有安裝過的軟體</h3>
-<p>先從ports當中安裝portmaster。更新port colecction，接著打<strong>portmaster -ayD</strong>全部更新，要對portmaster有更進一步了解，請參考底下網頁。</p>
+<p>在ghci中載入test.hs</p>
 
-<h3 id="section-3">參考資料</h3>
-<p><a href="http://www.freebsd.org/zh/FAQ/ports.html">1. Ports and Packages 常見問題</a></p>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ghci
+</span><span class="line">Prelude&gt; :l test
+</span><span class="line">[1 of 1] Compiling Main             ( test.hs, interpreted )
+</span><span class="line">Ok, modules loaded: Main.
+</span><span class="line">*Main&gt; add 3 4
+</span><span class="line">7</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<p><a href="http://pgx.servu.tw/2012/08/01/portmaster/">2. 系統 Ports 軟體升級工具： portmaster</a></p>
+<h3 id="script-">當成一般的 Script 使用</h3>
+<p>這個方案是要加上 <code>#!/usr/bin/runghc</code> 且Script當中需要有<code>main</code>存在
+以下是個範例</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cat &gt; hello.hs &lt;&lt; EOF
+</span><span class="line">&gt; #!/usr/bin/runghc
+</span><span class="line">&gt; main=putStrLn "Hello, Haskell from elf"
+</span><span class="line">&gt; EOF
+</span><span class="line">$ chmod +x hello.hs
+</span><span class="line">$ ./hello.hs 
+</span><span class="line">Hello, Haskell</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">編譯成執行檔</h2>
+<p>同樣的，這個方案也需要有<code>main</code>存在</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ghc hello.hs -o hello</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="haskell">其他有關Haskell的教學</h2>
+<p>網路上可以找到不少，先以這幾個當入門教材</p>
+
+<p><a href="http://www.haskell.org/haskellwiki/Tw/Haskell%E5%85%A5%E9%96%80%E7%9A%845%E5%80%8B%E6%AD%A5%E9%A9%9F">Haskell入門的5個步驟</a></p>
+
+<p><a href="http://www.haskellcn.com/haskellbook/Haskellstep/">Haskell在线教程</a></p>
+
+<p><a href="http://www.haskell.org/haskellwiki/Tutorials">Tutorials - Haskell</a></p>
 
 </div>
 
@@ -176,13 +227,13 @@
   
 
 
-<time datetime="2012-12-07T08:57:00+08:00" pubdate data-updated="true">Dec 7<span>th</span>, 2012</time>
+<time datetime="2013-05-24T22:04:00+08:00" pubdate data-updated="true">May 24<span>th</span>, 2013</time>
       
 
 <span class="categories">
   Category:
   
-    <a class='category' href='/blog/categories/it/'>IT</a>
+    <a class='category' href='/blog/categories/programming/'>Programming</a>
   
 </span>
 
@@ -192,7 +243,7 @@
 <span class="tags">
   Tag: 
   
-    <a class='tag' href='/blog/tags/freebbsd/'>FreebBSD</a>
+    <a class='tag' href='/blog/tags/fp-/'>FP,</a>, <a class='tag' href='/blog/tags/haskell/'>Haskell</a>
   
 </span>
 
@@ -201,7 +252,7 @@
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial/" >Tweet</a>
   
   
   
@@ -212,10 +263,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2012/12/05/incomplete-class-types-for-c-plus-plus/" title="Previous Post: Incomplete class types for C++">&laquo; Incomplete class types for C++</a>
+        <a class="basic-alignment left" href="/blog/2013/02/18/rvalue-reference/" title="Previous Post: Rvalue reference, std::move and std::forward">&laquo; Rvalue reference, std::move and std::forward</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2012/12/07/latex-on-octopress/" title="Next Post: 在Octopress中使用Latex">在Octopress中使用Latex &raquo;</a>
       
     </p>
   </footer>
@@ -311,8 +360,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd/';
-        var disqus_url = 'http://HungMingWu.github.com/blog/2012/12/07/how-to-use-ports-on-freebsd/';
+        var disqus_identifier = 'http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial/';
+        var disqus_url = 'http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial/';
         var disqus_script = 'embed.js';
       
     (function () {

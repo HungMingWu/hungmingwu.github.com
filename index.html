@@ -9,8 +9,9 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="這篇文章主要是Rvalue References: C++0x Features in VC10, Part 2的閱讀筆記，在原文撰寫過程當中，規格有所變動，因此根據最新的規則做補充說明。 Copy Problems
-C++98/03的時候，最令人詬病的問題，就是建立太多臨時物件，Value &hellip;">
+  <meta name="description" content="前一陣子都在忙C++ Grandmaster的比賽，沒什麼時間紀錄一些東西，最近對Functional Programming感到興趣，找Haskell當作的入門的開始。做些紀錄。 安裝
+以Ubuntu為例，先安裝Haskell。 1
+$ apt-get install ghc &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -99,6 +100,120 @@ C++98/03的時候，最令人詬病的問題，就是建立太多臨時物件，
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/05/24/haskell-beginner-tutorial/">Haskell beginner tutorial</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-05-24T22:04:00+08:00" pubdate data-updated="true">May 24<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/05/24/haskell-beginner-tutorial/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前一陣子都在忙C++ Grandmaster的比賽，沒什麼時間紀錄一些東西，最近對Functional Programming感到興趣，找Haskell當作的入門的開始。做些紀錄。</p>
+
+<h2 id="section">安裝</h2>
+<p>以Ubuntu為例，先安裝Haskell。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">apt</span>-get install ghc
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>接著就能用<code>ghci</code>進入直譯器了，用<code>Ctrl+D</code>退出ghci。</p>
+
+<h2 id="script-programming">Script Programming</h2>
+<p>有兩種方式可以達成</p>
+
+<h3 id="ghci">在ghci當中載入</h3>
+<p>首先我們先來寫一個<code>test.hs</code>文件</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cat &gt; test.hs &lt;&lt; EOF
+</span><span class="line">add x y = x + y
+</span><span class="line">EOF</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在ghci中載入test.hs</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ghci
+</span><span class="line">Prelude&gt; :l test
+</span><span class="line">[1 of 1] Compiling Main             ( test.hs, interpreted )
+</span><span class="line">Ok, modules loaded: Main.
+</span><span class="line">*Main&gt; add 3 4
+</span><span class="line">7</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="script-">當成一般的 Script 使用</h3>
+<p>這個方案是要加上 <code>#!/usr/bin/runghc</code> 且Script當中需要有<code>main</code>存在
+以下是個範例</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cat &gt; hello.hs &lt;&lt; EOF
+</span><span class="line">&gt; #!/usr/bin/runghc
+</span><span class="line">&gt; main=putStrLn "Hello, Haskell from elf"
+</span><span class="line">&gt; EOF
+</span><span class="line">$ chmod +x hello.hs
+</span><span class="line">$ ./hello.hs 
+</span><span class="line">Hello, Haskell</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">編譯成執行檔</h2>
+<p>同樣的，這個方案也需要有<code>main</code>存在</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>lang: bash</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ghc hello.hs -o hello</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="haskell">其他有關Haskell的教學</h2>
+<p>網路上可以找到不少，先以這幾個當入門教材</p>
+
+<p><a href="http://www.haskell.org/haskellwiki/Tw/Haskell%E5%85%A5%E9%96%80%E7%9A%845%E5%80%8B%E6%AD%A5%E9%A9%9F">Haskell入門的5個步驟</a></p>
+
+<p><a href="http://www.haskellcn.com/haskellbook/Haskellstep/">Haskell在线教程</a></p>
+
+<p><a href="http://www.haskell.org/haskellwiki/Tutorials">Tutorials - Haskell</a></p>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1640,81 +1755,6 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/18/compile-linux-kernel/">Compile Linux Kernel</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-18T17:20:00+08:00" pubdate data-updated="true">Dec 18<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/12/18/compile-linux-kernel/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Linux 3.7 kernel出了，順便記憶編譯核心過程</p>
-
-<p>到  <a href="http://www.kernel.org/">The Linux Kernel Archives</a> 抓取想要的核心版本，這裡我們拿3.7當範例，下載完並解開。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">tar</span> xjf linux-3.7.tar.bz2
-</span><span class="line"><span class="nv">$ </span><span class="nb">cd</span> linux-3.7
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>拿之前已經設定過的.config為基礎繼續修改</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">cp</span> /boot/config-x.x.x .config
-</span><span class="line"><span class="nv">$ </span><span class="nb">make</span> menuconfig
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>修改完之後就可以下 <strong>make</strong> 開始編譯</p>
-
-<p>等到結束之後，就能下</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">make</span> install
-</span><span class="line"><span class="nv">$ </span><span class="nb">make</span> modules_install
-</span><span class="line"><span class="nv">$ </span><span class="nb">make</span> headers_install
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>來安裝核心，模組，和對應的header files。</p>
-
-<p>更新 System.map</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">depmod</span> -eF -m  /boot/System.map-3.7.0 3.7.0
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1730,6 +1770,10 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/05/24/haskell-beginner-tutorial/">Haskell beginner tutorial</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a>
       </li>
     
@@ -1743,10 +1787,6 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
     
       <li class="post">
         <a href="/blog/2013/01/14/setup-ssh-server-in-ubuntu/">如何在ubuntu中設定ssh</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/14/delete-item-from-a-singly-linked-linear-list/">如何從一個Singly linked linear list中刪除資料</a>
       </li>
     
   </ul>
