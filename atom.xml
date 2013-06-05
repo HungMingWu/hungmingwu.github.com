@@ -4,7 +4,7 @@
   <title><![CDATA[第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-05-24T22:49:44+08:00</updated>
+  <updated>2013-06-05T23:23:57+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -12,6 +12,176 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Variadic templates]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/06/03/variadic-templates/"/>
+    <updated>2013-06-03T22:44:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/06/03/variadic-templates</id>
+    <content type="html"><![CDATA[<p>這次介紹另一個C++11重要的特性<strong>Variadic templates</strong></p>
+
+<h2 id="printf">從printf說起</h2>
+<p>相信每個寫程式的人，就算沒用過printf，也聽過printf的名字，printf的徒子徒孫大概跟Unix的子孫一樣多。而一般的printf使用方式就類似如此。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="kt">int</span> <span class="nf">my_printf</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">format</span><span class="p">,</span> <span class="p">...);</span>
+</span><span class="line"><span class="n">my_printf</span><span class="p">(</span><span class="s">&quot;%d + %d = %d&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在設計一個通用函數的時候，無法知道後面參數有多少個，因此需要一個支持不定參數的機制。
+從上面的程式碼看出，我們支援不定參數的語法就是<code>...</code>來表示。
+而在C語言如何實做這樣的機制，可以參考<a href="http://msdn.microsoft.com/en-us/library/kb57fad8%28v=vs.80%29.aspx">MSDN上的範例</a>。</p>
+
+<h2 id="marco">Marco也支援不定參數</h2>
+<p>在C99標準裡，Macro支持不定參數，不過Visual Studio至今不支援C99。
+我們可以寫類似這樣的Macro</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#define dprintf(enable, ...) dprintf_impl(__FILE__, __LINE__, enable, __VA_ARGS__)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在參數列的最後面寫 …，然後就可以用 <strong>VA_ARGS</strong> 代表 … 所傳入的參數。</p>
+
+<h2 id="template">如何讓Template支援不定參數</h2>
+
+<h3 id="c98">從C++98談起</h3>
+<p>在實作Command Design Pattern的時候，常常需要把外部函數的參數原封不動的傳遞至內部函數，解決方法大概就像這樣。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="cp">#define P1 typename T1</span>
+</span><span class="line"><span class="cp">#define A1 T1 &amp;&amp;v1</span>
+</span><span class="line"><span class="cp">#define V1 v1</span>
+</span><span class="line"><span class="cp">#define P2 typename T1, typename T2</span>
+</span><span class="line"><span class="cp">#define A2 T1 &amp;&amp;v1, T2 &amp;&amp;v2</span>
+</span><span class="line"><span class="cp">#define V2 v1, v2</span>
+</span><span class="line"><span class="cp">#define P3 typename T1, typename T2, typename T3</span>
+</span><span class="line"><span class="cp">#define A3 T1 &amp;&amp;v1, T2 &amp;&amp;v2, T3 &amp;&amp;v3</span>
+</span><span class="line"><span class="cp">#define V3 v1, v2, v3</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">A1</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">V1</span><span class="p">);</span> <span class="p">}</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="n">P2</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">A2</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">V2</span><span class="p">);</span> <span class="p">}</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="n">P3</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">A3</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">V3</span><span class="p">);</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這方案的缺點大概有以下幾點
+- 可代入的參數數量有限 (雖然可以手動擴充)
+- 程式碼難以維護，核心的程式碼不多，但是重複的程式碼很多
+- 編譯速度緩慢
+- 極度依賴Preprocessor
+加上C++11的新特性之後，問題變得更複雜了。</p>
+
+<h3 id="c11">C++11時期</h3>
+<p>來個最簡單的範例</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">VariadicTemplate</span> <span class="p">{};</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">VariadicTemplate1</span> <span class="p">{};</span>
+</span><span class="line">
+</span><span class="line"><span class="n">VariadicTemplate</span><span class="o">&lt;&gt;</span> <span class="n">a</span><span class="p">;</span>				<span class="c1">// VariadicTemplate1接受無任何型別</span>
+</span><span class="line"><span class="n">VariadicTemplate</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">;</span>
+</span><span class="line"><span class="n">VariadicTemplate1</span><span class="o">&lt;&gt;</span> <span class="n">c</span><span class="p">;</span>				<span class="c1">// VariadicTemplate1至少需要一個型別，編譯器會報錯</span>
+</span><span class="line"><span class="n">VariadicTemplate1</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="n">string</span><span class="o">&gt;</span> <span class="n">d</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在Args左邊出現<code>...</code>時，表示Args是一個<strong>Template type parameter pack</strong>，如上面的最後一行，T就是double，而Args就是int, string，除了類別之外，非類別的template paramter也可以這樣使用。如下</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">unsigned</span> <span class="p">...</span><span class="n">dims</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">Array</span> <span class="p">{};</span>
+</span><span class="line"><span class="n">Array</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="n">arr</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而Function template也可以像Class Template一樣使用不定參數</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">func</span><span class="p">(</span><span class="n">Args</span> <span class="p">...</span><span class="n">args</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這裡的Args不是Type，args也不是一個value，所以以下的程式碼會出問題</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">typedef</span> <span class="n">Args</span> <span class="n">MyList</span><span class="p">;</span>
+</span><span class="line"><span class="n">MyList</span> <span class="n">var</span><span class="p">;</span>
+</span><span class="line"><span class="k">auto</span> <span class="n">copy</span> <span class="o">=</span> <span class="n">args</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而sizeof也跟著Variadic templates而新增新特性，<code>sizeof...</code>可以印出Args到底有多少個參數</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">VariadicTemplate</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">static</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">short</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">...(</span><span class="n">Args</span><span class="p">);</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">VariadicTemplate</span><span class="o">&lt;&gt;::</span><span class="n">size</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>	<span class="c1">// 0</span>
+</span><span class="line"><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">VariadicTemplate</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;::</span><span class="n">size</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="c1">// 3</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="section">如何解決之前的問題</h3>
+<p>用新的特性同時解決perfect forwarding跟Variadic templates</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Ts</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">Ts</span><span class="o">&amp;&amp;</span> <span class="p">...</span><span class="n">args</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Ts</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...);</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="section-1">如何抽取單一個型別與參數</h3>
+<p>透過Template specification來實作</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">T</span> <span class="o">&amp;&amp;</span><span class="n">v</span><span class="p">);</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">T</span> <span class="o">&amp;&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">Args</span> <span class="p">...</span><span class="n">args</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+</span><span class="line">	<span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>還有其他未介紹到的特性，基於所知有限&lt;無法完全說明，可以參考<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2080.pdf">Variadic Templates (Revision 3) Draft</a>跟<a href="http://channel9.msdn.com/Events/GoingNative/GoingNative-2012/Variadic-Templates-are-Funadic">Variadic Templates are Funadic</a></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Haskell beginner tutorial]]></title>
@@ -2238,60 +2408,6 @@ int main (int argc, char *argv[])
 <div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 </pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span>./Hello
 </span></code></pre></td></tr></table></div></figure></notextile></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[如何使用gprof]]></title>
-    <link href="http://HungMingWu.github.com/blog/2012/10/04/gprof-usage/"/>
-    <updated>2012-10-04T18:00:00+08:00</updated>
-    <id>http://HungMingWu.github.com/blog/2012/10/04/gprof-usage</id>
-    <content type="html"><![CDATA[<p>gropf是gnu工具之一，在編譯的時候加入了profiling的source code，執行時統計user space的執行資料，可以得到每個function的被呼叫次數，執行時間，呼叫關係等。</p>
-
-<p>以下是一個簡單範例</p>
-
-<div><script src="https://gist.github.com/3833148.js"></script>
-<noscript><pre><code>int IsOdd(int x)
-{
-	return x &amp; 1;
-}
-int main(int argc, char *argv[])
-{
-	for (int i = 0; i &lt; 1000; i++) IsOdd(i);
-}</code></pre></noscript></div>
-
-<h2 id="quick-start">Quick Start</h2>
-
-<p>先用gcc編譯程式</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gcc hello.c -o hello -pg -g</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>-pg表示開啟profiling功能，如果要得到帶注視的程式碼清單，需加上-g。</p>
-
-<p>執行程式</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">./hello</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>此時會產生 gmon.out檔</p>
-
-<p>使用gprof對程式進行分析</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -p</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>得到每個函數所佔用的執行時間</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -q</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>得到call graph，每個函數的呼叫關係，</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -A</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>得到帶注釋的source code清單，列出每個函數的呼叫次數。</p>
 ]]></content>
   </entry>
   

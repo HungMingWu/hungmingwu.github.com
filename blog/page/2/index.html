@@ -9,10 +9,8 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="Linux 3.7 kernel出了，順便記憶編譯核心過程 到 The Linux Kernel Archives 抓取想要的核心版本，這裡我們拿3.7當範例，下載完並解開。 1
-2
-$ tar xjf linux-3.7.tar.bz2
-$ cd linux-3.7 拿之前已經設定過的. &hellip;">
+  <meta name="description" content="一直到今天才成功實驗出如何把WinMain放在DLL裡面，紀念一下。 首先，把WinMain放在DLL裡面。注意是WinMain而不是wWinMain，這邊也只有WinMain可以正常運作。 第二步，新增一個def檔，裡面加入 EXPORTSWinMain
+將WinMain輸出到Export &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,6 +99,54 @@ $ cd linux-3.7 拿之前已經設定過的. &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/19/export-winmain-from-dll/">Export WinMain from DLL</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-19T21:55:00+08:00" pubdate data-updated="true">Dec 19<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/19/export-winmain-from-dll/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>一直到今天才成功實驗出如何把WinMain放在DLL裡面，紀念一下。</p>
+
+<p>首先，把WinMain放在DLL裡面。注意是WinMain而不是wWinMain，這邊也只有WinMain可以正常運作。</p>
+
+<p>第二步，新增一個def檔，裡面加入</p>
+
+<blockquote><p>EXPORTS<br />WinMain</p></blockquote>
+<p>將WinMain輸出到Export Table，只有WinMain需要這樣做，用<strong>__declspec(dllexport)</strong>輸出的函數跟類別不受影響，且WinMain不能這方式輸出。視為特例。</p>
+
+<p>第三步，直接讓Application連結DLL產生的Library即可。</p>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1208,90 +1254,9 @@ int main (int argc, char *argv[])
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/10/04/gprof-usage/">如何使用gprof</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-04T18:00:00+08:00" pubdate data-updated="true">Oct 4<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/10/04/gprof-usage/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>gropf是gnu工具之一，在編譯的時候加入了profiling的source code，執行時統計user space的執行資料，可以得到每個function的被呼叫次數，執行時間，呼叫關係等。</p>
-
-<p>以下是一個簡單範例</p>
-
-<div><script src="https://gist.github.com/3833148.js"></script>
-<noscript><pre><code>int IsOdd(int x)
-{
-	return x &amp; 1;
-}
-int main(int argc, char *argv[])
-{
-	for (int i = 0; i &lt; 1000; i++) IsOdd(i);
-}</code></pre></noscript></div>
-
-<h2 id="quick-start">Quick Start</h2>
-
-<p>先用gcc編譯程式</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gcc hello.c -o hello -pg -g</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>-pg表示開啟profiling功能，如果要得到帶注視的程式碼清單，需加上-g。</p>
-
-<p>執行程式</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">./hello</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>此時會產生 gmon.out檔</p>
-
-<p>使用gprof對程式進行分析</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -p</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>得到每個函數所佔用的執行時間</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -q</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>得到call graph，每個函數的呼叫關係，</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -A</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>得到帶注釋的source code清單，列出每個函數的呼叫次數。</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/3/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1304,6 +1269,10 @@ int main(int argc, char *argv[])
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/06/03/variadic-templates/">Variadic templates</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/05/24/haskell-beginner-tutorial/">Haskell beginner tutorial</a>
@@ -1319,10 +1288,6 @@ int main(int argc, char *argv[])
     
       <li class="post">
         <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/14/setup-ssh-server-in-ubuntu/">如何在ubuntu中設定ssh</a>
       </li>
     
   </ul>

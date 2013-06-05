@@ -5,11 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Tag: gcc - 第十三號艦隊</title>
+  <title>第十三號艦隊</title>
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="Tag: gcc">
+  <meta name="description" content="gropf是gnu工具之一，在編譯的時候加入了profiling的source code，執行時統計user space的執行資料，可以得到每個function的被呼叫次數，執行時間，呼叫關係等。 以下是一個簡單範例 int IsOdd(int x)
+{ return x &amp; 1;
+} &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://HungMingWu.github.comblog/tags/gcc/">
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/page/3/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -96,40 +98,100 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
-    <h1 class="entry-title">Tag: gcc</h1>
+    
+      <h1 class="entry-title"><a href="/blog/2012/10/04/gprof-usage/">如何使用gprof</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-10-04T18:00:00+08:00" pubdate data-updated="true">Oct 4<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/10/04/gprof-usage/#disqus_thread">Comments</a>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="tag">
 
 
+  <div class="entry-content"><p>gropf是gnu工具之一，在編譯的時候加入了profiling的source code，執行時統計user space的執行資料，可以得到每個function的被呼叫次數，執行時間，呼叫關係等。</p>
 
-  
-  <h2>2012</h2>
+<p>以下是一個簡單範例</p>
 
-<article>
-  
-<h1><a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a></h1>
-<time datetime="2012-12-20T10:59:00+08:00" pubdate><span class='month'>Dec</span> <span class='day'>20</span> <span class='year'>2012</span></time>
+<div><script src="https://gist.github.com/3833148.js"></script>
+<noscript><pre><code>int IsOdd(int x)
+{
+	return x &amp; 1;
+}
+int main(int argc, char *argv[])
+{
+	for (int i = 0; i &lt; 1000; i++) IsOdd(i);
+}</code></pre></noscript></div>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/programming/'>programming</a></span>
-</footer>
+<h2 id="quick-start">Quick Start</h2>
 
+<p>先用gcc編譯程式</p>
 
-</article>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">gcc hello.c -o hello -pg -g</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>-pg表示開啟profiling功能，如果要得到帶注視的程式碼清單，需加上-g。</p>
+
+<p>執行程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">./hello</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>此時會產生 gmon.out檔</p>
+
+<p>使用gprof對程式進行分析</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -p</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>得到每個函數所佔用的執行時間</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -q</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>得到call graph，每個函數的呼叫關係，</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">gprof hello gmon.out -A</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>得到帶注釋的source code清單，列出每個函數的呼叫次數。</p>
 </div>
-
   
-</article>
+  
 
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/blog/page/2/">Newer &rarr;</a>
+    
+  </div>
 </div>
-
 <aside class="sidebar">
   
     <section>
@@ -162,7 +224,7 @@
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
+    <li class="loading">Status updating&#8230;</li>
   </ul>
   
   <a href="https://github.com/HungMingWu">@HungMingWu</a> on GitHub
@@ -195,7 +257,6 @@
 
   
 </aside>
-
 
     </div>
   </div>

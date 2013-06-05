@@ -1,0 +1,483 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Variadic templates - 第十三號艦隊</title>
+  <meta name="author" content="吳小明">
+
+  
+  <meta name="description" content="這次介紹另一個C++11重要的特性Variadic templates 從printf說起
+相信每個寫程式的人，就算沒用過printf，也聽過printf的名字，printf的徒子徒孫大概跟Unix的子孫一樣多。而一般的printf使用方式就類似如此。 1
+2
+int my_printf( &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/2013/06/03/variadic-templates/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="第十三號艦隊" type="application/atom+xml">
+  ﻿<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript"
+   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第十三號艦隊</a></h1>
+  
+    <h2>用文字來記錄我和我的一切</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:HungMingWu.github.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Variadic templates</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-03T22:44:00+08:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>這次介紹另一個C++11重要的特性<strong>Variadic templates</strong></p>
+
+<h2 id="printf">從printf說起</h2>
+<p>相信每個寫程式的人，就算沒用過printf，也聽過printf的名字，printf的徒子徒孫大概跟Unix的子孫一樣多。而一般的printf使用方式就類似如此。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="kt">int</span> <span class="nf">my_printf</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span> <span class="n">format</span><span class="p">,</span> <span class="p">...);</span>
+</span><span class="line"><span class="n">my_printf</span><span class="p">(</span><span class="s">&quot;%d + %d = %d&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在設計一個通用函數的時候，無法知道後面參數有多少個，因此需要一個支持不定參數的機制。
+從上面的程式碼看出，我們支援不定參數的語法就是<code>...</code>來表示。
+而在C語言如何實做這樣的機制，可以參考<a href="http://msdn.microsoft.com/en-us/library/kb57fad8%28v=vs.80%29.aspx">MSDN上的範例</a>。</p>
+
+<h2 id="marco">Marco也支援不定參數</h2>
+<p>在C99標準裡，Macro支持不定參數，不過Visual Studio至今不支援C99。
+我們可以寫類似這樣的Macro</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#define dprintf(enable, ...) dprintf_impl(__FILE__, __LINE__, enable, __VA_ARGS__)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在參數列的最後面寫 …，然後就可以用 <strong>VA_ARGS</strong> 代表 … 所傳入的參數。</p>
+
+<h2 id="template">如何讓Template支援不定參數</h2>
+
+<h3 id="c98">從C++98談起</h3>
+<p>在實作Command Design Pattern的時候，常常需要把外部函數的參數原封不動的傳遞至內部函數，解決方法大概就像這樣。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="cp">#define P1 typename T1</span>
+</span><span class="line"><span class="cp">#define A1 T1 &amp;&amp;v1</span>
+</span><span class="line"><span class="cp">#define V1 v1</span>
+</span><span class="line"><span class="cp">#define P2 typename T1, typename T2</span>
+</span><span class="line"><span class="cp">#define A2 T1 &amp;&amp;v1, T2 &amp;&amp;v2</span>
+</span><span class="line"><span class="cp">#define V2 v1, v2</span>
+</span><span class="line"><span class="cp">#define P3 typename T1, typename T2, typename T3</span>
+</span><span class="line"><span class="cp">#define A3 T1 &amp;&amp;v1, T2 &amp;&amp;v2, T3 &amp;&amp;v3</span>
+</span><span class="line"><span class="cp">#define V3 v1, v2, v3</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="n">P1</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">A1</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">V1</span><span class="p">);</span> <span class="p">}</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="n">P2</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">A2</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">V2</span><span class="p">);</span> <span class="p">}</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="n">P3</span><span class="o">&gt;</span> <span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">A3</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">V3</span><span class="p">);</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這方案的缺點大概有以下幾點
+- 可代入的參數數量有限 (雖然可以手動擴充)
+- 程式碼難以維護，核心的程式碼不多，但是重複的程式碼很多
+- 編譯速度緩慢
+- 極度依賴Preprocessor
+加上C++11的新特性之後，問題變得更複雜了。</p>
+
+<h3 id="c11">C++11時期</h3>
+<p>來個最簡單的範例</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">VariadicTemplate</span> <span class="p">{};</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">VariadicTemplate1</span> <span class="p">{};</span>
+</span><span class="line">
+</span><span class="line"><span class="n">VariadicTemplate</span><span class="o">&lt;&gt;</span> <span class="n">a</span><span class="p">;</span>				<span class="c1">// VariadicTemplate1接受無任何型別</span>
+</span><span class="line"><span class="n">VariadicTemplate</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">b</span><span class="p">;</span>
+</span><span class="line"><span class="n">VariadicTemplate1</span><span class="o">&lt;&gt;</span> <span class="n">c</span><span class="p">;</span>				<span class="c1">// VariadicTemplate1至少需要一個型別，編譯器會報錯</span>
+</span><span class="line"><span class="n">VariadicTemplate1</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="n">string</span><span class="o">&gt;</span> <span class="n">d</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在Args左邊出現<code>...</code>時，表示Args是一個<strong>Template type parameter pack</strong>，如上面的最後一行，T就是double，而Args就是int, string，除了類別之外，非類別的template paramter也可以這樣使用。如下</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">unsigned</span> <span class="p">...</span><span class="n">dims</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">Array</span> <span class="p">{};</span>
+</span><span class="line"><span class="n">Array</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="o">&gt;</span> <span class="n">arr</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而Function template也可以像Class Template一樣使用不定參數</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">func</span><span class="p">(</span><span class="n">Args</span> <span class="p">...</span><span class="n">args</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這裡的Args不是Type，args也不是一個value，所以以下的程式碼會出問題</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">typedef</span> <span class="n">Args</span> <span class="n">MyList</span><span class="p">;</span>
+</span><span class="line"><span class="n">MyList</span> <span class="n">var</span><span class="p">;</span>
+</span><span class="line"><span class="k">auto</span> <span class="n">copy</span> <span class="o">=</span> <span class="n">args</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而sizeof也跟著Variadic templates而新增新特性，<code>sizeof...</code>可以印出Args到底有多少個參數</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">struct</span> <span class="n">VariadicTemplate</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">static</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">short</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">...(</span><span class="n">Args</span><span class="p">);</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">VariadicTemplate</span><span class="o">&lt;&gt;::</span><span class="n">size</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>	<span class="c1">// 0</span>
+</span><span class="line"><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">VariadicTemplate</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;::</span><span class="n">size</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="c1">// 3</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="section">如何解決之前的問題</h3>
+<p>用新的特性同時解決perfect forwarding跟Variadic templates</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="p">...</span><span class="n">Ts</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">outer</span><span class="p">(</span><span class="n">Ts</span><span class="o">&amp;&amp;</span> <span class="p">...</span><span class="n">args</span><span class="p">)</span> <span class="p">{</span> <span class="n">inner</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Ts</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...);</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="section-1">如何抽取單一個型別與參數</h3>
+<p>透過Template specification來實作</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">T</span> <span class="o">&amp;&amp;</span><span class="n">v</span><span class="p">);</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="p">...</span><span class="n">Args</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">print</span><span class="p">(</span><span class="n">T</span> <span class="o">&amp;&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">Args</span> <span class="p">...</span><span class="n">args</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+</span><span class="line">	<span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">forward</span><span class="o">&lt;</span><span class="n">Args</span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">)...);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>還有其他未介紹到的特性，基於所知有限&lt;無法完全說明，可以參考<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2080.pdf">Variadic Templates (Revision 3) Draft</a>跟<a href="http://channel9.msdn.com/Events/GoingNative/GoingNative-2012/Variadic-Templates-are-Funadic">Variadic Templates are Funadic</a></p>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">吳小明</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-03T22:44:00+08:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2013</time>
+      
+
+
+      
+
+<span class="tags">
+  Tag: 
+  
+    <a class='tag' href='/blog/tags/c/'>C</a>, <a class='tag' href='/blog/tags/c-/'>C++</a>, <a class='tag' href='/blog/tags/c-11/'>C++11</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2013/06/03/variadic-templates/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2013/06/03/variadic-templates/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2013/05/24/haskell-beginner-tutorial/" title="Previous Post: Haskell beginner tutorial">&laquo; Haskell beginner tutorial</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/06/03/variadic-templates/">Variadic templates</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/05/24/haskell-beginner-tutorial/">Haskell beginner tutorial</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++11</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/HungMingWu">@HungMingWu</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'HungMingWu',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2013 - 吳小明 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'littlewhite0816';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://HungMingWu.github.com/blog/2013/06/03/variadic-templates/';
+        var disqus_url = 'http://HungMingWu.github.com/blog/2013/06/03/variadic-templates/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
