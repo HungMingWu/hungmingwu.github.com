@@ -9,10 +9,8 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="這次介紹另一個C++11重要的特性Variadic templates 從printf說起
-相信每個寫程式的人，就算沒用過printf，也聽過printf的名字，printf的徒子徒孫大概跟Unix的子孫一樣多。而一般的printf使用方式就類似如此。 1
-2
-int my_printf( &hellip;">
+  <meta name="description" content="最近在看Dynamic programming language的時候，注意到了這個特性。
+根據Wiki給的定義 When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,6 +99,197 @@ int my_printf( &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/06/20/duck-typing/">Duck Typing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-06-20T21:47:00+08:00" pubdate data-updated="true">Jun 20<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/06/20/duck-typing/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近在看Dynamic programming language的時候，注意到了這個特性。
+根據<a href="http://en.wikipedia.org/wiki/Duck_typing">Wiki給的定義</a></p>
+
+<blockquote><p>When I see a bird that walks like a duck and swims like a duck and quacks like a duck, I call that bird a duck.</p></blockquote>
+
+<p>一般OOP的觀念，就是定義一組Interface為公約數。不受Interface的約束，而動態語言是在執行時檢查是否滿足所需條件。</p>
+
+<p>以下是Ruby的範例</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">class</span> <span class="nc">Duck</span>
+</span><span class="line">  <span class="k">def</span> <span class="nf">quack</span>
+</span><span class="line">    <span class="nb">puts</span> <span class="s2">&quot;Quaaaaaack!&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">def</span> <span class="nf">feathers</span>
+</span><span class="line">    <span class="nb">puts</span> <span class="s2">&quot;The duck has white and gray feathers.&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">Person</span>
+</span><span class="line">  <span class="k">def</span> <span class="nf">quack</span>
+</span><span class="line">    <span class="nb">puts</span> <span class="s2">&quot;The person imitates a duck.&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">def</span> <span class="nf">feathers</span>
+</span><span class="line">    <span class="nb">puts</span> <span class="s2">&quot;The person takes a feather from the ground and shows it.&quot;</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">in_the_forest</span> <span class="n">duck</span>
+</span><span class="line">  <span class="n">duck</span><span class="o">.</span><span class="n">quack</span>
+</span><span class="line">  <span class="n">duck</span><span class="o">.</span><span class="n">feathers</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="k">def</span> <span class="nf">game</span>
+</span><span class="line">  <span class="n">donald</span> <span class="o">=</span> <span class="no">Duck</span><span class="o">.</span><span class="n">new</span>
+</span><span class="line">  <span class="n">john</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">new</span>
+</span><span class="line">  <span class="n">in_the_forest</span> <span class="n">donald</span>
+</span><span class="line">  <span class="n">in_the_forest</span> <span class="n">john</span>
+</span><span class="line"><span class="k">end</span>
+</span><span class="line">
+</span><span class="line"><span class="n">game</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>動態語言的特性，就是在執行的時刻檢查類別的完整性，如果把上面Person的feathers拿掉，也必須在執行時才會發現錯誤。</p>
+
+<p>如果是傳統競泰語言的話，如何顯示這種特性
+C++有兩種方式。</p>
+
+<p>一者是上面介紹的<code>Interface contract</code></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">class</span> <span class="nc">IAnimal</span> <span class="p">{</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">	<span class="k">virtual</span> <span class="kt">void</span> <span class="n">Quack</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">	<span class="k">virtual</span> <span class="kt">void</span> <span class="n">Feathers</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line">
+</span><span class="line"><span class="k">class</span> <span class="nc">Duck</span> <span class="o">:</span> <span class="k">public</span> <span class="n">IAnimal</span> <span class="p">{};</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">Person</span> <span class="o">:</span> <span class="k">public</span> <span class="n">IAnimal</span>  <span class="p">{};</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">void</span> <span class="n">in_the_forest</span><span class="p">(</span><span class="n">IAnimal</span> <span class="o">*</span><span class="n">pDuck</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">pDuck</span><span class="o">-&gt;</span><span class="n">Quack</span><span class="p">();</span>
+</span><span class="line">	<span class="n">pDuck</span><span class="o">-&gt;</span><span class="n">Feathers</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這種方式可以在Runtime的時候傳入某個滿足此Contract的物件，因此改變其行為。
+不過缺點也是顯而易見的，一旦介面修改之後，所有有關的程式碼都要更著修改。所以一般的建議就是一旦介面固定之後就不要更改。</p>
+
+<p>因此衍生了第二種方法，Template。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+</pre></td><td class="code"><pre><code class="cpp"><span class="line"><span class="k">class</span> <span class="nc">Duck</span> <span class="p">{</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">	<span class="kt">void</span> <span class="n">Quack</span><span class="p">();</span>
+</span><span class="line">	<span class="kt">void</span> <span class="n">Feathers</span><span class="p">();</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="k">class</span> <span class="nc">Person</span> <span class="p">{</span>
+</span><span class="line"><span class="k">public</span><span class="o">:</span>
+</span><span class="line">	<span class="kt">void</span> <span class="n">Quack</span><span class="p">();</span>
+</span><span class="line">	<span class="kt">void</span> <span class="n">Feathers</span><span class="p">();</span>
+</span><span class="line"><span class="p">};</span>
+</span><span class="line"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+</span><span class="line"><span class="kt">void</span> <span class="n">Program</span><span class="p">(</span><span class="n">T</span><span class="o">&amp;</span> <span class="n">duck</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">duck</span><span class="p">.</span><span class="n">Quack</span><span class="p">();</span>
+</span><span class="line">	<span class="n">duck</span><span class="p">.</span><span class="n">Feathers</span><span class="p">();</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>C++的Template會在C編譯時檢查所有約束條件，因此叫做<code>Static Polymorphism</code>，跟用Interface的<code>Dynamic Polymorphism</code>不同，Runtime沒有擴展性。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1792,121 +1981,6 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-20T10:59:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/12/20/gcc-notes/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3 id="gcc-">gcc 常用參數介紹</h3>
-
-<ul>
-  <li>什麼參數都不加</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> hello.c
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>直接產生a.out</p>
-
-<ul>
-  <li>無連結選項</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> hello.c -o hello
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>直接產生可執行文件hello</p>
-
-<ul>
-  <li><code>-x language</code> filename 
-設定文件所使用的語言，使預設的附檔名失效，對之後的檔案也有效，除非你再次設定這個參數。可以使用的語言有C/C++等。</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -x c hello.pig
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>上面這個例子，就是將附檔名pig的檔案當作C語言來編譯。如果在後面加上了<code>-x none</code> filename，則會抵銷前面的作用，回復復育社規則來編譯。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -x c hello.pig -x none hello2.c
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<ul>
-  <li>
-    <p><code>-c</code>
-將程式碼生成至obj file後停止，預設附檔名是.o。</p>
-  </li>
-  <li>
-    <p><code>-S</code>
-將程式生成至Assembler Code後停止，預設附檔名是.s。</p>
-  </li>
-  <li>
-    <p><code>-E</code>
-只處理Preprocess的部份，跟上面兩者不同，不會產生檔案，需要用Redirect的方式產生文件。</p>
-  </li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -E hello.c &gt; hello.i
-</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -E hello.c | less
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<ul>
-  <li><code>-o</code> 
-指定輸出檔案名稱，可以跟上面參數合併使用。</li>
-</ul>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -S hello.c -o hello.asm
-</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -c hello.c  -o hello.obj
-</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> hello.c -o hello.exe
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<ul>
-  <li><code>-ansi</code>
-關閉GNU C和ANSI C不相容的部分，在C模式相當於c90，在C++模式相當於C++98。如<code>asm</code>、&#8220;inline<code>、</code>typeof<code>等。如果你不考慮寫個標準的ISO C語言的話，在</code>-ansi<code>參數下還是能夠用</code><strong>asm</strong><code>、</code><strong>inline</strong><code>、</code><strong>typeof</strong>`等GCC拓展語法繼續工作。如果要避免這種情況，可以配合底下這個參數。</li>
-  <li><code>-pedandic</code>
-對所有不合乎C/C++ Standard的與法發出嚴重警告，</li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1922,6 +1996,10 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/06/20/duck-typing/">Duck Typing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/06/03/variadic-templates/">Variadic templates</a>
       </li>
     
@@ -1935,10 +2013,6 @@ please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels
     
       <li class="post">
         <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++11</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a>
       </li>
     
   </ul>

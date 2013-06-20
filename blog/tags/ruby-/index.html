@@ -5,15 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>在Octopress中使用Latex - 第十三號艦隊</title>
+  <title>Tag: Ruby, - 第十三號艦隊</title>
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="如果要在Octopress使用數學符號，首先先安裝 kramdown 1
-gem install kramdown 接著修改_config.yml index 1a06ae2..ef440ea 100644
---- a/_config.yml
-+++ b/_config.yml
-@@ -33,7 &hellip;">
+  <meta name="description" content="Tag: Ruby,">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -22,7 +18,7 @@ gem install kramdown 接著修改_config.yml index 1a06ae2..ef440ea 100644
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://HungMingWu.github.com/blog/2012/12/07/latex-on-octopress/">
+  <link rel="canonical" href="http://HungMingWu.github.comblog/tags/ruby-/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -101,189 +97,32 @@ gem install kramdown 接著修改_config.yml index 1a06ae2..ef440ea 100644
   <div id="main">
     <div id="content">
       <div>
-<article class="hentry" role="article">
+<article role="article">
   
   <header>
-    
-      <h1 class="entry-title">在Octopress中使用Latex</h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-07T15:18:00+08:00" pubdate data-updated="true">Dec 7<span>th</span>, 2012</time>
-        
-         | <a href="#disqus_thread">Comments</a>
-        
-      </p>
+    <h1 class="entry-title">Tag: Ruby,</h1>
     
   </header>
-
-
-<div class="entry-content"><p>如果要在Octopress使用數學符號，首先先安裝 kramdown</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">gem install kramdown</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>接著修改_config.yml</p>
-
-<div><script src="https://gist.github.com/4231812.js?file=_config.yaml.diff"></script>
-<noscript><pre><code>index 1a06ae2..ef440ea 100644
---- a/_config.yml
-+++ b/_config.yml
-@@ -33,7 +33,7 @@ destination: public
- plugins: plugins
- code_dir: downloads/code
- category_dir: blog/categories
--markdown: rdiscount
-+markdown: kramdown
- pygments: false # default python pygments have been replaced by pygments.rb
-
- paginate: 10          # Posts per page on the blog index</code></pre></noscript></div>
-
-<p>將rdiscount改成kramdown</p>
-
-<p>將以下這段代碼塞入 /source/_includes/custom/head.html</p>
-<div><script src="https://gist.github.com/4231812.js?file=head.html"></script>
-<noscript><pre><code>&lt;!-- mathjax config similar to math.stackexchange --&gt;
-
-&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
-  MathJax.Hub.Config({
-    tex2jax: {
-      inlineMath: [ ['$','$'], [&quot;\\(&quot;,&quot;\\)&quot;] ],
-      processEscapes: true
-    }
-  });
-&lt;/script&gt;
-
-&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
-    MathJax.Hub.Config({
-      tex2jax: {
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-    });
-&lt;/script&gt;
-
-&lt;script type=&quot;text/x-mathjax-config&quot;&gt;
-    MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax(), i;
-        for(i=0; i &lt; all.length; i += 1) {
-            all[i].SourceElement().parentNode.className += ' has-jax';
-        }
-    });
-&lt;/script&gt;
-
-&lt;script type=&quot;text/javascript&quot;
-   src=&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;&gt;
-&lt;/script&gt;
-</code></pre></noscript></div>
-
-<p>解決滑鼠右鍵按下會一片空白的問題</p>
-<div><script src="https://gist.github.com/4231812.js?file=_theme.scss.diff"></script>
-<noscript><pre><code>--- a/sass/base/_theme.scss
-+++ b/sass/base/_theme.scss
-@@ -75,7 +75,7 @@ html {
-   background: $page-bg image-url('line-tile.png') top left;
- }
- body {
--  &gt; div {
-+  &gt; div#main {
-     background: $sidebar-bg $noise-bg;
-     border-bottom: 1px solid $page-border-bottom;
-     &gt; div {
-</code></pre></noscript></div>
-
-<!-- more -->
-<p>以下是範例：</p>
-
-<script type="math/tex; mode=display">% <![CDATA[
-
-\begin{align*}
-  & \phi(x,y) = \phi \left(\sum_{i=1}^n x_ie_i, \sum_{j=1}^n y_je_j \right)
-  = \sum_{i=1}^n \sum_{j=1}^n x_i y_j \phi(e_i, e_j) = \\
-  & (x_1, \ldots, x_n) \left( \begin{array}{ccc}
-      \phi(e_1, e_1) & \cdots & \phi(e_1, e_n) \\
-      \vdots & \ddots & \vdots \\
-      \phi(e_n, e_1) & \cdots & \phi(e_n, e_n)
-    \end{array} \right)
-  \left( \begin{array}{c}
-      y_1 \\
-      \vdots \\
-      y_n
-    \end{array} \right)
-\end{align*}
- %]]></script>
-
-<p>試試看插入LaTeX數學式：$\exp(-\frac{x^2}{2})$</p>
-
-</div>
-
-
-  <footer>
-    <p class="meta">
-      
   
-
-<span class="byline author vcard">Posted by <span class="fn">吳小明</span></span>
-
-      
-
-
-
-
-
+  <div id="blog-archives" class="tag">
 
 
 
   
+  <h2>2013</h2>
 
-
-<time datetime="2012-12-07T15:18:00+08:00" pubdate data-updated="true">Dec 7<span>th</span>, 2012</time>
-      
-
-
-      
-
-
-    </p>
-    
-      <div class="sharing">
+<article>
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2012/12/07/latex-on-octopress/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2012/12/07/latex-on-octopress/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
-  
-</div>
+<h1><a href="/blog/2013/06/20/duck-typing/">Duck Typing</a></h1>
+<time datetime="2013-06-20T21:47:00+08:00" pubdate><span class='month'>Jun</span> <span class='day'>20</span> <span class='year'>2013</span></time>
 
-    
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2012/12/07/how-to-use-ports-on-freebsd/" title="Previous Post: How to use ports on FreeBSD">&laquo; How to use ports on FreeBSD</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2012/12/18/introduction-to-llvm/" title="Next Post: Introduction to LLVM">Introduction to LLVM &raquo;</a>
-      
-    </p>
-  </footer>
+
 </article>
 
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-  </section>
+
+  
+</article>
 
 </div>
 
@@ -368,10 +207,7 @@ gem install kramdown 接著修改_config.yml index 1a06ae2..ef440ea 100644
       var disqus_shortname = 'littlewhite0816';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://HungMingWu.github.com/blog/2012/12/07/latex-on-octopress/';
-        var disqus_url = 'http://HungMingWu.github.com/blog/2012/12/07/latex-on-octopress/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

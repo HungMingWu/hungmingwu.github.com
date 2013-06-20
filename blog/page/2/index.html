@@ -9,8 +9,9 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="一直到今天才成功實驗出如何把WinMain放在DLL裡面，紀念一下。 首先，把WinMain放在DLL裡面。注意是WinMain而不是wWinMain，這邊也只有WinMain可以正常運作。 第二步，新增一個def檔，裡面加入 EXPORTSWinMain
-將WinMain輸出到Export &hellip;">
+  <meta name="description" content="gcc 常用參數介紹 什麼參數都不加 1
+$ gcc hello.c 直接產生a.out 無連結選項 1
+$ gcc hello.c -o hello 直接產生可執行文件hello -x language filename 設定文件所使用的語言，使預設的附檔名失效，對之後的檔案也有效， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -99,6 +100,121 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/20/gcc-notes/">GCC Notes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-20T10:59:00+08:00" pubdate data-updated="true">Dec 20<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/20/gcc-notes/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3 id="gcc-">gcc 常用參數介紹</h3>
+
+<ul>
+  <li>什麼參數都不加</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> hello.c
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>直接產生a.out</p>
+
+<ul>
+  <li>無連結選項</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> hello.c -o hello
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>直接產生可執行文件hello</p>
+
+<ul>
+  <li><code>-x language</code> filename 
+設定文件所使用的語言，使預設的附檔名失效，對之後的檔案也有效，除非你再次設定這個參數。可以使用的語言有C/C++等。</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -x c hello.pig
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>上面這個例子，就是將附檔名pig的檔案當作C語言來編譯。如果在後面加上了<code>-x none</code> filename，則會抵銷前面的作用，回復復育社規則來編譯。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -x c hello.pig -x none hello2.c
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ul>
+  <li>
+    <p><code>-c</code>
+將程式碼生成至obj file後停止，預設附檔名是.o。</p>
+  </li>
+  <li>
+    <p><code>-S</code>
+將程式生成至Assembler Code後停止，預設附檔名是.s。</p>
+  </li>
+  <li>
+    <p><code>-E</code>
+只處理Preprocess的部份，跟上面兩者不同，不會產生檔案，需要用Redirect的方式產生文件。</p>
+  </li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -E hello.c &gt; hello.i
+</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -E hello.c | less
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ul>
+  <li><code>-o</code> 
+指定輸出檔案名稱，可以跟上面參數合併使用。</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -S hello.c -o hello.asm
+</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -c hello.c  -o hello.obj
+</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> hello.c -o hello.exe
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ul>
+  <li><code>-ansi</code>
+關閉GNU C和ANSI C不相容的部分，在C模式相當於c90，在C++模式相當於C++98。如<code>asm</code>、&#8220;inline<code>、</code>typeof<code>等。如果你不考慮寫個標準的ISO C語言的話，在</code>-ansi<code>參數下還是能夠用</code><strong>asm</strong><code>、</code><strong>inline</strong><code>、</code><strong>typeof</strong>`等GCC拓展語法繼續工作。如果要避免這種情況，可以配合底下這個參數。</li>
+  <li><code>-pedandic</code>
+對所有不合乎C/C++ Standard的與法發出嚴重警告，</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1054,206 +1170,6 @@ int main()
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/08/jni-tutorial/">JNI Tutorial</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-08T11:49:00+08:00" pubdate data-updated="true">Nov 8<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/08/jni-tutorial/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>記錄一下JNI的建立跟使用方法，在Linux底下驗證成功。
-以下是一個簡單的範例</p>
-
-<div><script src="https://gist.github.com/4036678.js?file=HelloWorld.java"></script>
-<noscript><pre><code>class HelloWorld {
-    public native void sayHello();
-    static {
-        System.loadLibrary(&quot;HelloWorld&quot;);
-    }
-    public static void main(String[] args) {
-        (new HelloWorld()).sayHello();
-    }
-}
-</code></pre></noscript></div>
-
-<p>裡面做的事情很簡單，載入Shared Object，呼叫 Native Code。</p>
-
-<p>第一步： 接著編譯 Java Code 產生 class 檔</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">javac</span> HelloWorld.java
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>第二步： 產生 HelloWorld.h Header File</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">javah</span> -jni HelloWorld.
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>產生出來的 Header File長這個樣子</p>
-<div><script src="https://gist.github.com/4036678.js?file=HelloWorld.h"></script>
-<noscript><pre><code>/* DO NOT EDIT THIS FILE - it is machine generated */
-#include &lt;jni.h&gt;
-/* Header for class HelloWorld */
-
-#ifndef _Included_HelloWorld
-#define _Included_HelloWorld
-#ifdef __cplusplus
-extern &quot;C&quot; {
-#endif
-/*
- * Class:     HelloWorld
- * Method:    sayHello
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_HelloWorld_sayHello
-  (JNIEnv *, jobject);
-
-#ifdef __cplusplus
-}
-#endif
-#endif
-</code></pre></noscript></div>
-
-<p>第三步： 撰寫對應的Native Code
-做的事情也很簡單，就是印出Hello World而已</p>
-<div><script src="https://gist.github.com/4036678.js?file=HelloWorld.c"></script>
-<noscript><pre><code>#include &lt;jni.h&gt;
-#include &quot;HelloWorld.h&quot;
-#include &lt;stdio.h&gt;
-
-JNIEXPORT void JNICALL Java_HelloWorld_sayHello (JNIEnv *env, jobject obj) {
-    printf(&quot;Hello,the World!!!\n&quot;);
-}
-</code></pre></noscript></div>
-
-<p>第四步： 產生 Shared Object</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> -I<span class="s2">&quot;/usr/lib/jvm/java-7-openjdk-amd64/include&quot;</span> -fPIC -shared -o libHelloWorld.so HelloWorld.c
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>此時libHelloWorld.so會跟HelloWorld.class在同一個目錄中
-第五步：  執行，將LibraryPath指向當前目錄
-&gt; java -Djava.library.path=<code>pwd</code> HelloWorld</p>
-
-<p>可以看到正確的結果。</p>
-
-<p>之前是介紹如何從 Java 呼叫 C++ 的 Native Code，現在要說的是如何從C++建立 Java Virtual Machine，進而執行 Java Code。</p>
-
-<p>第一步: 寫好Java Code且編譯
-這裡準備的 Java Code</p>
-<div><script src="https://gist.github.com/4037503.js?file=HelloWorld.java"></script>
-<noscript><pre><code>public class HelloWorld {
-        public static void main(String[] args) {
-                System.out.println(&quot;Hello, World in Java&quot;);
-        }
-}</code></pre></noscript></div>
-
-<p>編譯它</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">javac</span> HelloWorld.java
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>第二步：撰寫C++的程式碼且編譯</p>
-<div><script src="https://gist.github.com/4037503.js?file=Hello.cpp"></script>
-<noscript><pre><code>#include &lt;stdlib.h&gt;
-#include &lt;string.h&gt;
-#include &lt;stdio.h&gt;
-#include &lt;jni.h&gt;
-
-int main (int argc, char *argv[])
-{
-        JavaVM *jvm;                    /* 宣告一個java machine */
-        JNIEnv *env;                    /* JNI的環境 */
-        JavaVMInitArgs vm_args;
-
-        /*自定義JRE所要的參數，就是java -... -... xxx.java將-...字串加入options中 用*/
-        JavaVMOption options[1];
-
-        jint res;
-        jclass cls;
-        jmethodID mid;
-
-
-        vm_args.version = JNI_VERSION_1_6;  /*使用的版本*/
-        options[0].optionString = &quot;-Djava.class.path=./&quot;;
-        vm_args.nOptions = 1;
-        vm_args.options = options;
-        vm_args.ignoreUnrecognized = JNI_FALSE;
-
-        /*產生一個java machine*/
-        res = JNI_CreateJavaVM(&amp;jvm,(void**)&amp;env,&amp;vm_args);
-
-        jclass ver;
-        jmethodID print;
-
-        /*找Helloworld Class*/
-        cls = env-&gt;FindClass(&quot;HelloWorld&quot;);  
-
-        if (cls == 0) printf(&quot;cls error \n&quot;);
-
-        /*&gt;確定要執行的 function是甚麼 
-           在這裡指的是HelloWorld裡的main 
-           後面是main要傳的參數*/
-        mid = env-&gt;GetStaticMethodID(cls, &quot;main&quot;, &quot;([Ljava/lang/String;)V&quot;); 
-
-        if (mid == 0) printf(&quot;mid error \n&quot;);
-
-        env-&gt;CallStaticVoidMethod(cls, mid); /*執行此class*/
-
-        printf(&quot;Hello in c\n&quot;);
-        return 0;
-}</code></pre></noscript></div>
-
-<p>編譯它</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">g</span>++ -I<span class="s2">&quot;/usr/lib/jvm/java-7-openjdk-amd64/include&quot;</span>  -L<span class="s2">&quot;/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server&quot;</span> Hello.cpp -ljvm -o Hello
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>第三歩: 設定 LD_LIBRARY_PATH</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">export</span> LD_LIBRARY_PATH<span class="err">=</span><span class="nv">$LD_LIBRARY_PATH</span>:/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>第四歩： 執行程式</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span>./Hello
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1271,6 +1187,10 @@ int main (int argc, char *argv[])
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/06/20/duck-typing/">Duck Typing</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/06/03/variadic-templates/">Variadic templates</a>
       </li>
     
@@ -1284,10 +1204,6 @@ int main (int argc, char *argv[])
     
       <li class="post">
         <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++11</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/20/from-auto-ptr-to-unique-ptr/">From auto_ptr to unique_ptr</a>
       </li>
     
   </ul>
