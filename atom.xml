@@ -4,7 +4,7 @@
   <title><![CDATA[第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-06-20T22:56:55+08:00</updated>
+  <updated>2013-07-03T23:12:09+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -12,6 +12,49 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fix xxx is not in the sudoers file in linux]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux/"/>
+    <updated>2013-07-03T23:05:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux</id>
+    <content type="html"><![CDATA[<p>在Linux常常遇到這種情況，記錄一下。
+使用<code>sudo</code>執行指令的時候，常常會<strong>xxx is not in the sudoers file. This incident will be reported.</strong>
+表示你的用戶沒有權限使用sudo，必須修改<code>/etc//sudoers</code>這個文件，修改方式如下。</p>
+
+<ol>
+  <li>進入Super user mode</li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">su</span> -
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ol>
+  <li>修改文件權限</li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">chmod</span> u+x  /etc/sudoers
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<ol>
+  <li>修改<code>/etc/sudoers</code>內容，在<strong>root    ALL=(ALL)       ALL</strong>底下加上一行且存檔。</li>
+</ol>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line">xxx ALL<span class="err">=(</span>ALL<span class="err">)</span> ALL
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這裡的xxx就是你的用戶名稱
+4. 回復文件權限</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">chmod</span> u-x  /etc/sudoers
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Duck Typing]]></title>
@@ -2375,30 +2418,6 @@ int main()
 <blockquote><p>A temporary bound to a reference member in a constructor’s ctor-initializer (12.6.2) persists until the constructor exits.</p></blockquote>
 <p>所以這個暫時物件的生命週期就跟main的生命週期一樣長，無需再複製一份。</p>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Find text pattern in files on Linux]]></title>
-    <link href="http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux/"/>
-    <updated>2012-11-09T09:40:00+08:00</updated>
-    <id>http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux</id>
-    <content type="html"><![CDATA[<p>在Linux下尋找text pattern的方法。
-方法一：使用 find 跟 xargs 共同使用
-&gt; find dir/ | xargs grep str</p>
-
-<p>這方法會搜尋底下的子目錄
-&gt; find file | xargs grep str</p>
-
-<p>搜尋檔案裡面是否出現text pattern</p>
-
-<p>方法二： 直接使用grep
-&gt; grep [-r] str dir/* </p>
-
-<p>搜尋目錄下的所有檔案，-r表示是否蓮子目錄一起搜尋
-&gt; grep str file</p>
-
-<p>搜尋檔案裡面是否出現text pattern</p>
 ]]></content>
   </entry>
   

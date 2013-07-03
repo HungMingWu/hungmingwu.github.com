@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: linux | 第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/blog/tags/linux/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-06-20T22:56:55+08:00</updated>
+  <updated>2013-07-03T23:12:09+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -12,6 +12,37 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fix xxx is not in the sudoers file in linux]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux/"/>
+    <updated>2013-07-03T23:05:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux</id>
+    <content type="html"><![CDATA[<p>在Linux常常遇到這種情況，記錄一下。
+使用<code>sudo</code>執行指令的時候，常常會<strong>xxx is not in the sudoers file. This incident will be reported.</strong>
+表示你的用戶沒有權限使用sudo，必須修改<code>/etc//sudoers</code>這個文件，修改方式如下。</p>
+
+<ol>
+  <li>進入Super user mode
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">su</span> -
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+  <li>修改文件權限
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">chmod</span> u+x  /etc/sudoers
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+  <li>修改<code>/etc/sudoers</code>內容，在<strong>root    ALL=(ALL)       ALL</strong>底下加上一行且存檔。
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>xxx ALL<span class="err">=(</span>ALL<span class="err">)</span> ALL
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+這裡的xxx就是你的用戶名稱</li>
+  <li>回復文件權限
+<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">chmod</span> u-x  /etc/sudoers
+</span></code></pre></td></tr></table></div></figure></notextile></div></li>
+</ol>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[如何在ubuntu中設定ssh]]></title>

@@ -9,9 +9,12 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="gcc 常用參數介紹 什麼參數都不加 1
-$ gcc hello.c 直接產生a.out 無連結選項 1
-$ gcc hello.c -o hello 直接產生可執行文件hello -x language filename 設定文件所使用的語言，使預設的附檔名失效，對之後的檔案也有效， &hellip;">
+  <meta name="description" content="在Stackoverflow看到類似的問題，紀錄一下
+假設我門需要把一個resource加入執行檔或Library，可以使用以下的方法
+假設我們現在有個檔案，叫做data
+裡面的內容還是我們的老朋友Hello world!
+有兩個方式可以達成 將檔案變成 object file 1
+$ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -100,6 +103,171 @@ $ gcc hello.c -o hello 直接產生可執行文件hello -x language filename 設
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/">Add resource files to executable/library for gcc</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-01-10T19:22:00+08:00" pubdate data-updated="true">Jan 10<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/01/10/Add-resource-files-to-executablelibrary-for-gcc/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在Stackoverflow看到<a href="http://stackoverflow.com/questions/4864866/c-c-with-gcc-statically-add-resource-files-to-executable-library">類似的問題</a>，紀錄一下
+假設我門需要把一個resource加入執行檔或Library，可以使用以下的方法
+假設我們現在有個檔案，叫做data
+裡面的內容還是我們的老朋友<code>Hello world!</code>
+有兩個方式可以達成</p>
+
+<h2 id="object-file">將檔案變成 object file</h2>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">objcopy</span> -I binary -O elf64-x86-64 -B i386 data data.o
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>如果我們用nm來觀看其內容</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">nm</span> data.o
+</span><span class="line">000000000000000d D _binary_data_end
+</span><span class="line">000000000000000d A _binary_data_size
+</span><span class="line">0000000000000000 D _binary_data_start
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>其中的<strong>A</strong>代表在之後的連結過程，其數值不會再之後的動作所更改。接著我們寫另外一段程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="cp">#include &lt;stdio.h&gt;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="s">&quot;_binary_data_start&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data_size</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="s">&quot;_binary_data_size&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="k">extern</span> <span class="kt">char</span> <span class="n">my_data_end</span><span class="p">[]</span> <span class="n">asm</span><span class="p">(</span><span class="s">&quot;_binary_data_end&quot;</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">        <span class="kt">char</span> <span class="o">*</span><span class="n">c</span><span class="p">;</span>
+</span><span class="line">        <span class="k">for</span> <span class="p">(</span><span class="n">c</span> <span class="o">=</span> <span class="n">my_data</span><span class="p">;</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">my_data_end</span><span class="p">;</span> <span class="n">c</span><span class="o">++</span><span class="p">)</span> <span class="n">putchar</span><span class="p">(</span><span class="o">*</span><span class="n">c</span><span class="p">);</span>
+</span><span class="line">        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;String length: %ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>  <span class="p">(</span><span class="kt">long</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">my_data_size</span><span class="p">);</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>編譯且執行他</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> test.c data.o -o test
+</span><span class="line"><span class="nv">$ </span>./test
+</span><span class="line">Hello world!
+</span><span class="line">String length: 13
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>從code可以看出，我們的<code>my_data</code>就是對應_binary_data_start的部分
+please reference <a href="http://gcc.gnu.org/onlinedocs/gcc-4.4.0/gcc/Asm-Labels.html#Asm-Labels">Controlling Names Used in Assembler Code</a></p>
+
+<p>重新用nm看產生的執行檔，關切我們在意的部分</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">nm</span> test
+</span><span class="line">0000000000601035 D _binary_data_end
+</span><span class="line">000000000000000d A _binary_data_size
+</span><span class="line">0000000000601028 D _binary_data_start
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>發現_binary_data_start跟_binary_data_end在連結之後，都被重定位了。而_binary_data_size的位置保持不變，因此可以做為一個sentinel使用。</p>
+
+<h2 id="header-file-">將檔案變成單一header file (適用於各種編譯器)</h2>
+
+<p>利用工具將Binary Data轉成Header file，這邊用linux的xxd來做示範。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">xxd</span> xxd -i data data.h
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>重寫我們的程式</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="c"><span class="line"><span class="n">nclude</span> <span class="o">&lt;</span><span class="n">stdio</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span>
+</span><span class="line"><span class="cp">#include &quot;data.h&quot;</span>
+</span><span class="line">
+</span><span class="line"><span class="kt">int</span> <span class="n">main</span><span class="p">()</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">        <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span><span class="line">        <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">data_len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">putchar</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span><span class="line">        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;String length: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>  <span class="n">data_len</span><span class="p">);</span>
+</span><span class="line">        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>編譯且執行他</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> test.c -o test
+</span><span class="line"><span class="nv">$ </span>./test
+</span><span class="line">Hello world!
+</span><span class="line">String length: 13
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>可以得到跟上面一樣的結果。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1117,59 +1285,6 @@ int main()
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2012/11/09/find-text-pattern-in-files-on-linux/">Find text pattern in files on Linux</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-09T09:40:00+08:00" pubdate data-updated="true">Nov 9<span>th</span>, 2012</time>
-        
-         | <a href="/blog/2012/11/09/find-text-pattern-in-files-on-linux/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在Linux下尋找text pattern的方法。
-方法一：使用 find 跟 xargs 共同使用
-&gt; find dir/ | xargs grep str</p>
-
-<p>這方法會搜尋底下的子目錄
-&gt; find file | xargs grep str</p>
-
-<p>搜尋檔案裡面是否出現text pattern</p>
-
-<p>方法二： 直接使用grep
-&gt; grep [-r] str dir/* </p>
-
-<p>搜尋目錄下的所有檔案，-r表示是否蓮子目錄一起搜尋
-&gt; grep str file</p>
-
-<p>搜尋檔案裡面是否出現text pattern</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -1187,6 +1302,10 @@ int main()
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux/">Fix xxx is not in the sudoers file in linux</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/06/20/duck-typing/">Duck Typing</a>
       </li>
     
@@ -1200,10 +1319,6 @@ int main()
     
       <li class="post">
         <a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/01/28/lambda-expression-in-c-plus-plus-0x/">Lambda Expression in C++11</a>
       </li>
     
   </ul>
