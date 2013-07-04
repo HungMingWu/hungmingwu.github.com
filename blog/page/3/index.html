@@ -9,10 +9,9 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="在Linux下尋找text pattern的方法。
-方法一：使用 find 跟 xargs 共同使用
-&gt; find dir/ | xargs grep str 這方法會搜尋底下的子目錄
-&gt; find file | xargs grep str 搜尋檔案裡面是否出現text &hellip;">
+  <meta name="description" content="之前實驗出來的結果，做個筆記，以免日後忘記。 由於現在的C++編譯器都會做某種程度的最佳化，以GCC來當範本，加上-fno-elide-constructors 參數避免Copy elision。 以下是我們的程式碼。 #include &lt;iostream&gt;
+struct foo
+{ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -101,6 +100,158 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2012/12/04/c-plus-plus-return-secret/">C++ return secret</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-12-04T10:34:00+08:00" pubdate data-updated="true">Dec 4<span>th</span>, 2012</time>
+        
+         | <a href="/blog/2012/12/04/c-plus-plus-return-secret/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>之前實驗出來的結果，做個筆記，以免日後忘記。</p>
+
+<p>由於現在的C++編譯器都會做某種程度的最佳化，以GCC來當範本，加上<strong>-fno-elide-constructors</strong> 參數避免<a href="http://en.wikipedia.org/wiki/Copy_elision">Copy elision</a>。</p>
+
+<p>以下是我們的程式碼。</p>
+
+<div><script src="https://gist.github.com/4200056.js?file=Demo1.cpp"></script>
+<noscript><pre><code>#include &lt;iostream&gt;
+struct foo
+{
+        static int count;
+        int id;
+        foo() : id(++count)
+        {
+                std::cout &lt;&lt; &quot;Constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
+        }
+
+        foo(const foo&amp; f) :id(++count)
+        {
+                std::cout &lt;&lt; &quot;Copy constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
+        }
+
+        ~foo()
+        {
+                std::cout &lt;&lt; &quot;Destructing.. &quot; &lt;&lt; id &lt;&lt; std::endl;
+        }
+};
+int foo::count = 0;
+foo get()
+{
+        foo f;
+        return f;
+}
+int main()
+{
+        foo f = get();
+        std::cout &lt;&lt; &quot;before return&quot; &lt;&lt; std::endl;
+        return 0;
+}</code></pre></noscript></div>
+
+<p>而第一版的執行結果如下</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">Constructing! 1
+</span><span class="line">Copy constructing! 2
+</span><span class="line">Destructing.. 1
+</span><span class="line">Copy constructing! 3
+</span><span class="line">Destructing.. 2
+</span><span class="line">before return
+</span><span class="line">Destructing.. 3</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>從結果我們可以發現，get函數裡面的f，就是id為1的物件，而這個物件在函數結束之後就結束生命週期。而id為2的物件就是get回傳的暫時物件。當回傳時會複製f的內容，而生命週期在main中的<strong>foo f = get();</strong>之後也跟著消失，從這邊可以看到，我們<strong>產生了一個物件，複製了兩份物件</strong>，如果當物件體積大的時候，大量的複製/銷燬這種損失是巨大的。</p>
+
+<p>接著介紹
+<a href="http://herbsutter.com/2008/01/01/gotw-88-a-candidate-for-the-most-important-const/">Returning temporary object and binding to const reference</a>
+第二版的程式碼</p>
+
+<div><script src="https://gist.github.com/4200056.js?file=Demo2.cpp"></script>
+<noscript><pre><code>#include &lt;iostream&gt;
+struct foo
+{
+        static int count;
+        int id;
+        foo() : id(++count)
+        {
+                std::cout &lt;&lt; &quot;Constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
+        }
+
+        foo(const foo&amp; f) :id(++count)
+        {
+                std::cout &lt;&lt; &quot;Copy constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
+        }
+
+        ~foo()
+        {
+                std::cout &lt;&lt; &quot;Destructing.. &quot; &lt;&lt; id &lt;&lt; std::endl;
+        }
+};
+int foo::count = 0;
+foo get()
+{
+        foo f;
+        return f;
+}
+int main()
+{
+        const foo&amp; f = get();
+        std::cout &lt;&lt; &quot;before return&quot; &lt;&lt; std::endl;
+        return 0;
+}</code></pre></noscript></div>
+
+<p>來看執行結果</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">Constructing! 1
+</span><span class="line">Copy constructing! 2
+</span><span class="line">Destructing.. 1
+</span><span class="line">before return
+</span><span class="line">Destructing.. 2</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>看到少了一個Object生成，這是由於<a href="http://cpp0x.centaur.ath.cx/class.temporary.html">C++  Standards Temporary objects </a>中有這麼一段話。</p>
+
+<blockquote><p>A temporary bound to a reference member in a constructor’s ctor-initializer (12.6.2) persists until the constructor exits.</p></blockquote>
+<p>所以這個暫時物件的生命週期就跟main的生命週期一樣長，無需再複製一份。</p>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -453,6 +604,10 @@ int main(int argc, char *argv[])
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/07/04/compile-llvm-and-clang/">Compile LLVM &amp; Clang</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux/">Fix xxx is not in the sudoers file in linux</a>
       </li>
     
@@ -466,10 +621,6 @@ int main(int argc, char *argv[])
     
       <li class="post">
         <a href="/blog/2013/05/24/haskell-beginner-tutorial/">Haskell beginner tutorial</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a>
       </li>
     
   </ul>

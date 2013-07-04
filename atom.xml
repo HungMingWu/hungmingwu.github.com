@@ -4,7 +4,7 @@
   <title><![CDATA[第十三號艦隊]]></title>
   <link href="http://HungMingWu.github.com/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
-  <updated>2013-07-03T23:12:09+08:00</updated>
+  <updated>2013-07-04T21:43:49+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
   <author>
     <name><![CDATA[吳小明]]></name>
@@ -12,6 +12,83 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Compile LLVM &amp; Clang]]></title>
+    <link href="http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang/"/>
+    <updated>2013-07-04T21:40:00+08:00</updated>
+    <id>http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang</id>
+    <content type="html"><![CDATA[<p>隨著LLVM 3.3版本出來，記錄一下如河編譯，編譯環境是CentOS 6。
+使用<strong>CMake</strong>和<strong>Ninja</strong>來兩套工具編譯。</p>
+
+<p>CMake是用來產生個平台(Windows/MacOSX/Linux/FreeBSD等)建置專案的解決方案，在Visual Studio產生Solutions，在Linux產生正統的Makefile。 更多的CMake用法可以在網路找到。
+而Ninja是用來加速編譯的過程，新版的CMake就能直接產生Ninja的build configuration。
+這裡是一篇<a href="http://cyukang.com/2012/12/13/have-a-try-for-ninja.html">Ninja 的簡易使用說明</a></p>
+
+<h2 id="section">前期作業</h2>
+<p>編譯及安裝Ninja</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ git clone https://github.com/martine/ninja.git
+</span><span class="line">$ git checkout release
+</span><span class="line">$ ./bootstrap.py
+</span><span class="line">cp ninja /usr/bin/</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>編譯及安裝CMake</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ git clone git://cmake.org/stage/cmake.git
+</span><span class="line">$ cd cmake
+</span><span class="line">$ git checkout next
+</span><span class="line">$ ./bootstrap
+</span><span class="line">$ make
+</span><span class="line">$ sudo make install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">編譯</h2>
+
+<p>假設已經把<strong>LLVM</strong>的程式碼且放到<code>llvm</code>的目錄底下，將<strong>Clang</strong>的程式碼放到<code>llvm/tools/clang</code>的目錄底下，和<strong>Clang Tools Extra</strong>的程式碼放在<code>llvm/tools/clang/tools/extra</code>底下。
+建立一個build目錄放置CMake的設定黨，由於CMake支援<code>Out-of-source Build</code>技術，原先的目錄可以不遭受污染，就算失敗就只要砍掉build的目錄即可。我們使用Out-of-source Build的方式來建置Makefile。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cd llvm
+</span><span class="line">$ mkdir build &amp;&amp; cd build
+</span><span class="line">$ cmake -G Ninja -DLLVM_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+</span><span class="line">$ ninja
+</span><span class="line">$ ninja check		# Test LLVM only.
+</span><span class="line">$ ninja clang-test	# Test Clang only.
+</span><span class="line">$ sudo ninja install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這裡的<code>cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local</code> 等價於傳統的 <code>./configure --prefix=/usr/local/</code>方式</p>
+
+<h2 id="section-2">再度測試</h2>
+<p>當安裝完之後，我們使用Clang當做Complier編譯自己，我們使用ccmake來設定編譯參數。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ccmake ..</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><strong>ccmake</strong>可以使用GUI來改變控制變數，在這個案例我們把<code>CMAKE_CXX_COMPILER</code>改成<code>/usr/local/bin/clang++</code>，按<code>c</code>重新configure，且按<code>g</code>重新生成。
+之後我們就可以用</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ninja</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>來測試是否正確運行了。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Fix xxx is not in the sudoers file in linux]]></title>
@@ -2294,129 +2371,6 @@ int main()
 <p>由於我們有待除錯參數，所以我們可以發現Memory Leak發生在main.cpp的第三行。</p>
 
 <p>Valgrind不只可以偵測一般的執行檔，連Static Library跟SharedObject都可以偵測，只要記得編譯時帶除錯參數。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[C++ return secret]]></title>
-    <link href="http://HungMingWu.github.com/blog/2012/12/04/c-plus-plus-return-secret/"/>
-    <updated>2012-12-04T10:34:00+08:00</updated>
-    <id>http://HungMingWu.github.com/blog/2012/12/04/c-plus-plus-return-secret</id>
-    <content type="html"><![CDATA[<p>之前實驗出來的結果，做個筆記，以免日後忘記。</p>
-
-<p>由於現在的C++編譯器都會做某種程度的最佳化，以GCC來當範本，加上<strong>-fno-elide-constructors</strong> 參數避免<a href="http://en.wikipedia.org/wiki/Copy_elision">Copy elision</a>。</p>
-
-<p>以下是我們的程式碼。</p>
-
-<div><script src="https://gist.github.com/4200056.js?file=Demo1.cpp"></script>
-<noscript><pre><code>#include &lt;iostream&gt;
-struct foo
-{
-        static int count;
-        int id;
-        foo() : id(++count)
-        {
-                std::cout &lt;&lt; &quot;Constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
-        }
-
-        foo(const foo&amp; f) :id(++count)
-        {
-                std::cout &lt;&lt; &quot;Copy constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
-        }
-
-        ~foo()
-        {
-                std::cout &lt;&lt; &quot;Destructing.. &quot; &lt;&lt; id &lt;&lt; std::endl;
-        }
-};
-int foo::count = 0;
-foo get()
-{
-        foo f;
-        return f;
-}
-int main()
-{
-        foo f = get();
-        std::cout &lt;&lt; &quot;before return&quot; &lt;&lt; std::endl;
-        return 0;
-}</code></pre></noscript></div>
-
-<p>而第一版的執行結果如下</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">Constructing! 1
-</span><span class="line">Copy constructing! 2
-</span><span class="line">Destructing.. 1
-</span><span class="line">Copy constructing! 3
-</span><span class="line">Destructing.. 2
-</span><span class="line">before return
-</span><span class="line">Destructing.. 3</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>從結果我們可以發現，get函數裡面的f，就是id為1的物件，而這個物件在函數結束之後就結束生命週期。而id為2的物件就是get回傳的暫時物件。當回傳時會複製f的內容，而生命週期在main中的<strong>foo f = get();</strong>之後也跟著消失，從這邊可以看到，我們<strong>產生了一個物件，複製了兩份物件</strong>，如果當物件體積大的時候，大量的複製/銷燬這種損失是巨大的。</p>
-
-<p>接著介紹
-<a href="http://herbsutter.com/2008/01/01/gotw-88-a-candidate-for-the-most-important-const/">Returning temporary object and binding to const reference</a>
-第二版的程式碼</p>
-
-<div><script src="https://gist.github.com/4200056.js?file=Demo2.cpp"></script>
-<noscript><pre><code>#include &lt;iostream&gt;
-struct foo
-{
-        static int count;
-        int id;
-        foo() : id(++count)
-        {
-                std::cout &lt;&lt; &quot;Constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
-        }
-
-        foo(const foo&amp; f) :id(++count)
-        {
-                std::cout &lt;&lt; &quot;Copy constructing! &quot; &lt;&lt; id &lt;&lt; std::endl;
-        }
-
-        ~foo()
-        {
-                std::cout &lt;&lt; &quot;Destructing.. &quot; &lt;&lt; id &lt;&lt; std::endl;
-        }
-};
-int foo::count = 0;
-foo get()
-{
-        foo f;
-        return f;
-}
-int main()
-{
-        const foo&amp; f = get();
-        std::cout &lt;&lt; &quot;before return&quot; &lt;&lt; std::endl;
-        return 0;
-}</code></pre></noscript></div>
-
-<p>來看執行結果</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class=""><span class="line">Constructing! 1
-</span><span class="line">Copy constructing! 2
-</span><span class="line">Destructing.. 1
-</span><span class="line">before return
-</span><span class="line">Destructing.. 2</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>看到少了一個Object生成，這是由於<a href="http://cpp0x.centaur.ath.cx/class.temporary.html">C++  Standards Temporary objects </a>中有這麼一段話。</p>
-
-<blockquote><p>A temporary bound to a reference member in a constructor’s ctor-initializer (12.6.2) persists until the constructor exits.</p></blockquote>
-<p>所以這個暫時物件的生命週期就跟main的生命週期一樣長，無需再複製一份。</p>
 
 ]]></content>
   </entry>

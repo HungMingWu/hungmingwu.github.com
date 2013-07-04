@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Programming | 第十三號艦隊]]></title>
-  <link href="http://HungMingWu.github.com/blog/categories/programming/atom.xml" rel="self"/>
+  <title><![CDATA[Tag: Clang | 第十三號艦隊]]></title>
+  <link href="http://HungMingWu.github.com/blog/tags/clang/atom.xml" rel="self"/>
   <link href="http://HungMingWu.github.com/"/>
   <updated>2013-07-04T21:43:49+08:00</updated>
   <id>http://HungMingWu.github.com/</id>
@@ -79,85 +79,6 @@
 <div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>$ ninja</span></code></pre></td></tr></table></div></figure></notextile></div>
 來測試是否正確運行了。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Haskell beginner tutorial]]></title>
-    <link href="http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial/"/>
-    <updated>2013-05-24T22:04:00+08:00</updated>
-    <id>http://HungMingWu.github.com/blog/2013/05/24/haskell-beginner-tutorial</id>
-    <content type="html"><![CDATA[<p>前一陣子都在忙C++ Grandmaster的比賽，沒什麼時間紀錄一些東西，最近對Functional Programming感到興趣，找Haskell當作的入門的開始。做些紀錄。</p>
-
-<h2 id="section">安裝</h2>
-<p>以Ubuntu為例，先安裝Haskell。
-<div class='bogus-wrapper'><notextile><figure class='code'> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span><span class="nb">apt</span>-get install ghc
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>接著就能用<code>ghci</code>進入直譯器了，用<code>Ctrl+D</code>退出ghci。</p>
-
-<h2 id="script-programming">Script Programming</h2>
-<p>有兩種方式可以達成</p>
-
-<h3 id="ghci">在ghci當中載入</h3>
-<p>首先我們先來寫一個<code>test.hs</code>文件
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>lang: bash</span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ cat &gt; test.hs « EOF
-</span><span class='line'>add x y = x + y
-</span><span class='line'>EOF</span></code></pre></td></tr></table></div></figure></notextile></div>
-在ghci中載入test.hs
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>lang: bash</span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ghci
-</span><span class='line'>Prelude&gt; :l test
-</span><span class='line'>[1 of 1] Compiling Main             ( test.hs, interpreted )
-</span><span class='line'>Ok, modules loaded: Main.
-</span><span class='line'>*Main&gt; add 3 4
-</span><span class='line'>7</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h3 id="script-">當成一般的 Script 使用</h3>
-<p>這個方案是要加上 <code>#!/usr/bin/runghc</code> 且Script當中需要有<code>main</code>存在
-以下是個範例
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>lang: bash</span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ cat &gt; hello.hs « EOF
-</span><span class='line'>&gt; #!/usr/bin/runghc
-</span><span class='line'>&gt; main=putStrLn “Hello, Haskell from elf”
-</span><span class='line'>&gt; EOF
-</span><span class='line'>$ chmod +x hello.hs
-</span><span class='line'>$ ./hello.hs 
-</span><span class='line'>Hello, Haskell</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h2 id="section-1">編譯成執行檔</h2>
-<p>同樣的，這個方案也需要有<code>main</code>存在
-<div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>lang: bash</span></figcaption>
-<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ ghc hello.hs -o hello</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h2 id="haskell">其他有關Haskell的教學</h2>
-<p>網路上可以找到不少，先以這幾個當入門教材</p>
-
-<p><a href="http://www.haskell.org/haskellwiki/Tw/Haskell%E5%85%A5%E9%96%80%E7%9A%845%E5%80%8B%E6%AD%A5%E9%A9%9F">Haskell入門的5個步驟</a></p>
-
-<p><a href="http://www.haskellcn.com/haskellbook/Haskellstep/">Haskell在线教程</a></p>
-
-<p><a href="http://www.haskell.org/haskellwiki/Tutorials">Tutorials - Haskell</a></p>
-
 ]]></content>
   </entry>
   

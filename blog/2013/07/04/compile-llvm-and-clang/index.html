@@ -5,14 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Find text pattern in files on Linux - 第十三號艦隊</title>
+  <title>Compile LLVM &amp; Clang - 第十三號艦隊</title>
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="在Linux下尋找text pattern的方法。
-方法一：使用 find 跟 xargs 共同使用
-&gt; find dir/ | xargs grep str 這方法會搜尋底下的子目錄
-&gt; find file | xargs grep str 搜尋檔案裡面是否出現text &hellip;">
+  <meta name="description" content="隨著LLVM 3.3版本出來，記錄一下如河編譯，編譯環境是CentOS 6。
+使用CMake和Ninja來兩套工具編譯。 CMake是用來產生個平台(Windows/MacOSX/Linux/FreeBSD等)建置專案的解決方案，在Visual Studio產生Solutions， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux/">
+  <link rel="canonical" href="http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -104,7 +102,7 @@
   
   <header>
     
-      <h1 class="entry-title">Find text pattern in files on Linux</h1>
+      <h1 class="entry-title">Compile LLVM &amp; Clang</h1>
     
     
       <p class="meta">
@@ -120,7 +118,7 @@
   
 
 
-<time datetime="2012-11-09T09:40:00+08:00" pubdate data-updated="true">Nov 9<span>th</span>, 2012</time>
+<time datetime="2013-07-04T21:40:00+08:00" pubdate data-updated="true">Jul 4<span>th</span>, 2013</time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -129,22 +127,75 @@
   </header>
 
 
-<div class="entry-content"><p>在Linux下尋找text pattern的方法。
-方法一：使用 find 跟 xargs 共同使用
-&gt; find dir/ | xargs grep str</p>
+<div class="entry-content"><p>隨著LLVM 3.3版本出來，記錄一下如河編譯，編譯環境是CentOS 6。
+使用<strong>CMake</strong>和<strong>Ninja</strong>來兩套工具編譯。</p>
 
-<p>這方法會搜尋底下的子目錄
-&gt; find file | xargs grep str</p>
+<p>CMake是用來產生個平台(Windows/MacOSX/Linux/FreeBSD等)建置專案的解決方案，在Visual Studio產生Solutions，在Linux產生正統的Makefile。 更多的CMake用法可以在網路找到。
+而Ninja是用來加速編譯的過程，新版的CMake就能直接產生Ninja的build configuration。
+這裡是一篇<a href="http://cyukang.com/2012/12/13/have-a-try-for-ninja.html">Ninja 的簡易使用說明</a></p>
 
-<p>搜尋檔案裡面是否出現text pattern</p>
+<h2 id="section">前期作業</h2>
+<p>編譯及安裝Ninja</p>
 
-<p>方法二： 直接使用grep
-&gt; grep [-r] str dir/* </p>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ git clone https://github.com/martine/ninja.git
+</span><span class="line">$ git checkout release
+</span><span class="line">$ ./bootstrap.py
+</span><span class="line">cp ninja /usr/bin/</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<p>搜尋目錄下的所有檔案，-r表示是否蓮子目錄一起搜尋
-&gt; grep str file</p>
+<p>編譯及安裝CMake</p>
 
-<p>搜尋檔案裡面是否出現text pattern</p>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ git clone git://cmake.org/stage/cmake.git
+</span><span class="line">$ cd cmake
+</span><span class="line">$ git checkout next
+</span><span class="line">$ ./bootstrap
+</span><span class="line">$ make
+</span><span class="line">$ sudo make install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">編譯</h2>
+
+<p>假設已經把<strong>LLVM</strong>的程式碼且放到<code>llvm</code>的目錄底下，將<strong>Clang</strong>的程式碼放到<code>llvm/tools/clang</code>的目錄底下，和<strong>Clang Tools Extra</strong>的程式碼放在<code>llvm/tools/clang/tools/extra</code>底下。
+建立一個build目錄放置CMake的設定黨，由於CMake支援<code>Out-of-source Build</code>技術，原先的目錄可以不遭受污染，就算失敗就只要砍掉build的目錄即可。我們使用Out-of-source Build的方式來建置Makefile。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cd llvm
+</span><span class="line">$ mkdir build &amp;&amp; cd build
+</span><span class="line">$ cmake -G Ninja -DLLVM_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+</span><span class="line">$ ninja
+</span><span class="line">$ ninja check		# Test LLVM only.
+</span><span class="line">$ ninja clang-test	# Test Clang only.
+</span><span class="line">$ sudo ninja install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這裡的<code>cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local</code> 等價於傳統的 <code>./configure --prefix=/usr/local/</code>方式</p>
+
+<h2 id="section-2">再度測試</h2>
+<p>當安裝完之後，我們使用Clang當做Complier編譯自己，我們使用ccmake來設定編譯參數。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ccmake ..</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><strong>ccmake</strong>可以使用GUI來改變控制變數，在這個案例我們把<code>CMAKE_CXX_COMPILER</code>改成<code>/usr/local/bin/clang++</code>，按<code>c</code>重新configure，且按<code>g</code>重新生成。
+之後我們就可以用</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ninja</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>來測試是否正確運行了。</p>
 </div>
 
 
@@ -167,18 +218,32 @@
   
 
 
-<time datetime="2012-11-09T09:40:00+08:00" pubdate data-updated="true">Nov 9<span>th</span>, 2012</time>
+<time datetime="2013-07-04T21:40:00+08:00" pubdate data-updated="true">Jul 4<span>th</span>, 2013</time>
       
+
+<span class="categories">
+  Category:
+  
+    <a class='category' href='/blog/categories/programming/'>Programming</a>
+  
+</span>
 
 
       
+
+<span class="tags">
+  Tag: 
+  
+    <a class='tag' href='/blog/tags/c-/'>C++,</a>, <a class='tag' href='/blog/tags/clang/'>Clang</a>, <a class='tag' href='/blog/tags/llvm-/'>LLVM,</a>
+  
+</span>
 
 
     </p>
     
       <div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang/" data-via="" data-counturl="http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang/" >Tweet</a>
   
   
   
@@ -189,10 +254,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2012/11/08/jni-tutorial/" title="Previous Post: JNI Tutorial">&laquo; JNI Tutorial</a>
+        <a class="basic-alignment left" href="/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux/" title="Previous Post: Fix xxx is not in the sudoers file in linux">&laquo; Fix xxx is not in the sudoers file in linux</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2012/12/04/c-plus-plus-return-secret/" title="Next Post: C++ return secret">C++ return secret &raquo;</a>
       
     </p>
   </footer>
@@ -288,8 +351,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux/';
-        var disqus_url = 'http://HungMingWu.github.com/blog/2012/11/09/find-text-pattern-in-files-on-linux/';
+        var disqus_identifier = 'http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang/';
+        var disqus_url = 'http://HungMingWu.github.com/blog/2013/07/04/compile-llvm-and-clang/';
         var disqus_script = 'embed.js';
       
     (function () {

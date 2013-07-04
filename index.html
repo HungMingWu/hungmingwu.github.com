@@ -9,9 +9,8 @@
   <meta name="author" content="吳小明">
 
   
-  <meta name="description" content="在Linux常常遇到這種情況，記錄一下。
-使用sudo執行指令的時候，常常會xxx is not in the sudoers file. This incident will be reported.
-表示你的用戶沒有權限使用sudo，必須修改/etc//sudoers這個文件，修改方式如下。 &hellip;">
+  <meta name="description" content="隨著LLVM 3.3版本出來，記錄一下如河編譯，編譯環境是CentOS 6。
+使用CMake和Ninja來兩套工具編譯。 CMake是用來產生個平台(Windows/MacOSX/Linux/FreeBSD等)建置專案的解決方案，在Visual Studio產生Solutions， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -100,6 +99,112 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/07/04/compile-llvm-and-clang/">Compile LLVM &amp; Clang</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-07-04T21:40:00+08:00" pubdate data-updated="true">Jul 4<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/07/04/compile-llvm-and-clang/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>隨著LLVM 3.3版本出來，記錄一下如河編譯，編譯環境是CentOS 6。
+使用<strong>CMake</strong>和<strong>Ninja</strong>來兩套工具編譯。</p>
+
+<p>CMake是用來產生個平台(Windows/MacOSX/Linux/FreeBSD等)建置專案的解決方案，在Visual Studio產生Solutions，在Linux產生正統的Makefile。 更多的CMake用法可以在網路找到。
+而Ninja是用來加速編譯的過程，新版的CMake就能直接產生Ninja的build configuration。
+這裡是一篇<a href="http://cyukang.com/2012/12/13/have-a-try-for-ninja.html">Ninja 的簡易使用說明</a></p>
+
+<h2 id="section">前期作業</h2>
+<p>編譯及安裝Ninja</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ git clone https://github.com/martine/ninja.git
+</span><span class="line">$ git checkout release
+</span><span class="line">$ ./bootstrap.py
+</span><span class="line">cp ninja /usr/bin/</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>編譯及安裝CMake</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ git clone git://cmake.org/stage/cmake.git
+</span><span class="line">$ cd cmake
+</span><span class="line">$ git checkout next
+</span><span class="line">$ ./bootstrap
+</span><span class="line">$ make
+</span><span class="line">$ sudo make install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-1">編譯</h2>
+
+<p>假設已經把<strong>LLVM</strong>的程式碼且放到<code>llvm</code>的目錄底下，將<strong>Clang</strong>的程式碼放到<code>llvm/tools/clang</code>的目錄底下，和<strong>Clang Tools Extra</strong>的程式碼放在<code>llvm/tools/clang/tools/extra</code>底下。
+建立一個build目錄放置CMake的設定黨，由於CMake支援<code>Out-of-source Build</code>技術，原先的目錄可以不遭受污染，就算失敗就只要砍掉build的目錄即可。我們使用Out-of-source Build的方式來建置Makefile。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ cd llvm
+</span><span class="line">$ mkdir build &amp;&amp; cd build
+</span><span class="line">$ cmake -G Ninja -DLLVM_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr/local ..
+</span><span class="line">$ ninja
+</span><span class="line">$ ninja check		# Test LLVM only.
+</span><span class="line">$ ninja clang-test	# Test Clang only.
+</span><span class="line">$ sudo ninja install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>這裡的<code>cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local</code> 等價於傳統的 <code>./configure --prefix=/usr/local/</code>方式</p>
+
+<h2 id="section-2">再度測試</h2>
+<p>當安裝完之後，我們使用Clang當做Complier編譯自己，我們使用ccmake來設定編譯參數。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ccmake ..</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><strong>ccmake</strong>可以使用GUI來改變控制變數，在這個案例我們把<code>CMAKE_CXX_COMPILER</code>改成<code>/usr/local/bin/clang++</code>，按<code>c</code>重新configure，且按<code>g</code>重新生成。
+之後我們就可以用</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">$ ninja</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>來測試是否正確運行了。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1791,104 +1896,6 @@ auto_ptr的問題是沒有<strong>Copy Semantics</strong>，他的Copy Construct
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/01/10/ar-ranlib-ld-issue/">ar, ranlib, ld issue</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-01-10T19:22:00+08:00" pubdate data-updated="true">Jan 10<span>th</span>, 2013</time>
-        
-         | <a href="/blog/2013/01/10/ar-ranlib-ld-issue/#disqus_thread">Comments</a>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在網路上找了一下ranlib的用法，發現這算是歷史共業之一。
-一開始的ar只是像tar一樣，負責打包所有的object file。而不用來處理linking時所需要的Archive index，這個部分交由ranlib來負責。
-後來發現這兩個部份可以合而為一，再加入或更新object file的時候，一同更新所需要的Archive Index。ranlib的功用就如同<code>ar -s</code>，為了維持相容性而留下來。</p>
-
-<p>以下是一個需要使用ranlib的例子，為了示範，使用特殊的設定，一般不會遇到這種問題。假設我們現在有個foo.o了，接著建立一個archive file。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">ar</span> rcS libTest.a foo.o
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>注意這邊的<strong>S</strong>選項，我們強迫不讓他產生Symbol table，現今的環境就算不加<strong>s</strong>也會產生Symbol tabl。</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> main.c libTest.a -o main
-</span><span class="line">libTest.a: could not read symbols: Archive has no index; run ranlib to add one
-</span><span class="line">collect2: ld returned 1 exit status
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>用nm看一下libTest.a</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">nm</span> -s libTest.a
-</span><span class="line">
-</span><span class="line">foo.o:
-</span><span class="line">0000000000000000 T foo
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>nm對<code>-s</code>的說明如下 </p>
-<blockquote><p>When listing symbols from archive members, include the index: a mapping (stored in the archive by ar or ranlib) of which modulescontain definitions for which names.</p></blockquote>
-<p>以上的結果表示我們在archive file裡面沒有archive index的存在，這時候就該<code>ranlib</code>登場了</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">ranlib</span> libTest.a
-</span><span class="line"><span class="nv">$ </span><span class="nb">gcc</span> test.c libTest.a -o test
-</span><span class="line"><span class="nv">$ </span>./test
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>再度用nm來看結果</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"> <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-</pre></td><td class="code"><pre><code class="bash"><span class="line"><span class="nv">$ </span><span class="nb">nm</span> -s libTest.a
-</span><span class="line">Archive index:
-</span><span class="line">foo in foo.o
-</span><span class="line">
-</span><span class="line">foo.o:
-</span><span class="line">0000000000000000 T foo
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>現在看到Archive index被成功建立了</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1904,6 +1911,10 @@ auto_ptr的問題是沒有<strong>Copy Semantics</strong>，他的Copy Construct
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2013/07/04/compile-llvm-and-clang/">Compile LLVM &amp; Clang</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/07/03/fix-xxx-is-not-in-the-sudoers-file-in-linux/">Fix xxx is not in the sudoers file in linux</a>
       </li>
     
@@ -1917,10 +1928,6 @@ auto_ptr的問題是沒有<strong>Copy Semantics</strong>，他的Copy Construct
     
       <li class="post">
         <a href="/blog/2013/05/24/haskell-beginner-tutorial/">Haskell beginner tutorial</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/02/18/rvalue-reference/">Rvalue reference, std::move and std::forward</a>
       </li>
     
   </ul>
